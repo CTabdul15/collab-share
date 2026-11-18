@@ -1,0 +1,34 @@
+# Dependencies and build output
+node_modules/
+dist/
+out/
+*.vsix
+*.tsbuildinfo
+
+# Test and editor tooling
+.vscode-test/
+coverage/
+.claude/
+
+# Logs and temporary files
+*.log
+npm-debug.log*
+*.tmp
+*.bak
+
+# Operating system junk
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Your own saved whiteboards (the example in examples/ is kept)
+*.board.json
+!examples/*.board.json
+
+# Design leftovers
+resources/icon-options.jpg
+
+# Screenshot/demo scripts (need local helper files that aren't in the project)
+test/visual*.js
+test/shots.js
+test/hostgone.js

@@ -1,0 +1,1014 @@
+{
+ "format": "collab-share-whiteboard",
+ "version": 1,
+ "saved": "2026-11-18T11:49:41.660Z",
+ "shapes": [
+  {
+   "id": "clock",
+   "type": "node",
+   "kind": "CLOCK",
+   "x": 0,
+   "y": 150,
+   "by": "Collab Share example",
+   "t": 1,
+   "z": 2,
+   "value": 0.25
+  },
+  {
+   "id": "run",
+   "type": "node",
+   "kind": "LEVER",
+   "x": 0,
+   "y": 230,
+   "by": "Collab Share example",
+   "t": 2,
+   "z": 3,
+   "value": true
+  },
+  {
+   "id": "gate",
+   "type": "node",
+   "kind": "AND",
+   "x": 150,
+   "y": 205,
+   "by": "Collab Share example",
+   "t": 3,
+   "z": 4
+  },
+  {
+   "id": "reset",
+   "type": "node",
+   "kind": "BUTTON",
+   "x": 0,
+   "y": 330,
+   "by": "Collab Share example",
+   "t": 4,
+   "z": 5,
+   "value": false
+  },
+  {
+   "id": "w-clock.0-gate.0",
+   "type": "wire",
+   "a": {
+    "n": "clock",
+    "p": 0
+   },
+   "b": {
+    "n": "gate",
+    "p": 0
+   },
+   "by": "Collab Share example",
+   "t": 5,
+   "z": 0
+  },
+  {
+   "id": "w-run.0-gate.1",
+   "type": "wire",
+   "a": {
+    "n": "run",
+    "p": 0
+   },
+   "b": {
+    "n": "gate",
+    "p": 1
+   },
+   "by": "Collab Share example",
+   "t": 6,
+   "z": 0
+  },
+  {
+   "id": "ff0",
+   "type": "node",
+   "kind": "DFF",
+   "x": 300,
+   "y": 170,
+   "by": "Collab Share example",
+   "t": 7,
+   "z": 8
+  },
+  {
+   "id": "lamp0",
+   "type": "node",
+   "kind": "LAMP",
+   "x": 432,
+   "y": 20,
+   "by": "Collab Share example",
+   "t": 8,
+   "z": 9,
+   "color": "#ff3131",
+   "rot": 270
+  },
+  {
+   "id": "w-ff0.0-lamp0.0",
+   "type": "wire",
+   "a": {
+    "n": "ff0",
+    "p": 0
+   },
+   "b": {
+    "n": "lamp0",
+    "p": 0
+   },
+   "by": "Collab Share example",
+   "t": 9,
+   "z": 0
+  },
+  {
+   "id": "w-gate.0-ff0.1",
+   "type": "wire",
+   "a": {
+    "n": "gate",
+    "p": 0
+   },
+   "b": {
+    "n": "ff0",
+    "p": 1
+   },
+   "by": "Collab Share example",
+   "t": 10,
+   "z": 0
+  },
+  {
+   "id": "w-reset.0-ff0.3",
+   "type": "wire",
+   "a": {
+    "n": "reset",
+    "p": 0
+   },
+   "b": {
+    "n": "ff0",
+    "p": 3
+   },
+   "by": "Collab Share example",
+   "t": 11,
+   "z": 0
+  },
+  {
+   "id": "ff1",
+   "type": "node",
+   "kind": "DFF",
+   "x": 510,
+   "y": 170,
+   "by": "Collab Share example",
+   "t": 12,
+   "z": 13
+  },
+  {
+   "id": "lamp1",
+   "type": "node",
+   "kind": "LAMP",
+   "x": 642,
+   "y": 20,
+   "by": "Collab Share example",
+   "t": 13,
+   "z": 14,
+   "color": "#ff3131",
+   "rot": 270
+  },
+  {
+   "id": "w-ff1.0-lamp1.0",
+   "type": "wire",
+   "a": {
+    "n": "ff1",
+    "p": 0
+   },
+   "b": {
+    "n": "lamp1",
+    "p": 0
+   },
+   "by": "Collab Share example",
+   "t": 14,
+   "z": 0
+  },
+  {
+   "id": "w-gate.0-ff1.1",
+   "type": "wire",
+   "a": {
+    "n": "gate",
+    "p": 0
+   },
+   "b": {
+    "n": "ff1",
+    "p": 1
+   },
+   "by": "Collab Share example",
+   "t": 15,
+   "z": 0
+  },
+  {
+   "id": "w-reset.0-ff1.3",
+   "type": "wire",
+   "a": {
+    "n": "reset",
+    "p": 0
+   },
+   "b": {
+    "n": "ff1",
+    "p": 3
+   },
+   "by": "Collab Share example",
+   "t": 16,
+   "z": 0
+  },
+  {
+   "id": "w-ff0.0-ff1.0",
+   "type": "wire",
+   "a": {
+    "n": "ff0",
+    "p": 0
+   },
+   "b": {
+    "n": "ff1",
+    "p": 0
+   },
+   "by": "Collab Share example",
+   "t": 17,
+   "z": 0
+  },
+  {
+   "id": "ff2",
+   "type": "node",
+   "kind": "DFF",
+   "x": 720,
+   "y": 170,
+   "by": "Collab Share example",
+   "t": 18,
+   "z": 19
+  },
+  {
+   "id": "lamp2",
+   "type": "node",
+   "kind": "LAMP",
+   "x": 852,
+   "y": 20,
+   "by": "Collab Share example",
+   "t": 19,
+   "z": 20,
+   "color": "#ff3131",
+   "rot": 270
+  },
+  {
+   "id": "w-ff2.0-lamp2.0",
+   "type": "wire",
+   "a": {
+    "n": "ff2",
+    "p": 0
+   },
+   "b": {
+    "n": "lamp2",
+    "p": 0
+   },
+   "by": "Collab Share example",
+   "t": 20,
+   "z": 0
+  },
+  {
+   "id": "w-gate.0-ff2.1",
+   "type": "wire",
+   "a": {
+    "n": "gate",
+    "p": 0
+   },
+   "b": {
+    "n": "ff2",
+    "p": 1
+   },
+   "by": "Collab Share example",
+   "t": 21,
+   "z": 0
+  },
+  {
+   "id": "w-reset.0-ff2.3",
+   "type": "wire",
+   "a": {
+    "n": "reset",
+    "p": 0
+   },
+   "b": {
+    "n": "ff2",
+    "p": 3
+   },
+   "by": "Collab Share example",
+   "t": 22,
+   "z": 0
+  },
+  {
+   "id": "w-ff1.0-ff2.0",
+   "type": "wire",
+   "a": {
+    "n": "ff1",
+    "p": 0
+   },
+   "b": {
+    "n": "ff2",
+    "p": 0
+   },
+   "by": "Collab Share example",
+   "t": 23,
+   "z": 0
+  },
+  {
+   "id": "ff3",
+   "type": "node",
+   "kind": "DFF",
+   "x": 930,
+   "y": 170,
+   "by": "Collab Share example",
+   "t": 24,
+   "z": 25
+  },
+  {
+   "id": "lamp3",
+   "type": "node",
+   "kind": "LAMP",
+   "x": 1062,
+   "y": 20,
+   "by": "Collab Share example",
+   "t": 25,
+   "z": 26,
+   "color": "#ff3131",
+   "rot": 270
+  },
+  {
+   "id": "w-ff3.0-lamp3.0",
+   "type": "wire",
+   "a": {
+    "n": "ff3",
+    "p": 0
+   },
+   "b": {
+    "n": "lamp3",
+    "p": 0
+   },
+   "by": "Collab Share example",
+   "t": 26,
+   "z": 0
+  },
+  {
+   "id": "w-gate.0-ff3.1",
+   "type": "wire",
+   "a": {
+    "n": "gate",
+    "p": 0
+   },
+   "b": {
+    "n": "ff3",
+    "p": 1
+   },
+   "by": "Collab Share example",
+   "t": 27,
+   "z": 0
+  },
+  {
+   "id": "w-reset.0-ff3.3",
+   "type": "wire",
+   "a": {
+    "n": "reset",
+    "p": 0
+   },
+   "b": {
+    "n": "ff3",
+    "p": 3
+   },
+   "by": "Collab Share example",
+   "t": 28,
+   "z": 0
+  },
+  {
+   "id": "w-ff2.0-ff3.0",
+   "type": "wire",
+   "a": {
+    "n": "ff2",
+    "p": 0
+   },
+   "b": {
+    "n": "ff3",
+    "p": 0
+   },
+   "by": "Collab Share example",
+   "t": 29,
+   "z": 0
+  },
+  {
+   "id": "ff4",
+   "type": "node",
+   "kind": "DFF",
+   "x": 1140,
+   "y": 170,
+   "by": "Collab Share example",
+   "t": 30,
+   "z": 31
+  },
+  {
+   "id": "lamp4",
+   "type": "node",
+   "kind": "LAMP",
+   "x": 1272,
+   "y": 20,
+   "by": "Collab Share example",
+   "t": 31,
+   "z": 32,
+   "color": "#ff3131",
+   "rot": 270
+  },
+  {
+   "id": "w-ff4.0-lamp4.0",
+   "type": "wire",
+   "a": {
+    "n": "ff4",
+    "p": 0
+   },
+   "b": {
+    "n": "lamp4",
+    "p": 0
+   },
+   "by": "Collab Share example",
+   "t": 32,
+   "z": 0
+  },
+  {
+   "id": "w-gate.0-ff4.1",
+   "type": "wire",
+   "a": {
+    "n": "gate",
+    "p": 0
+   },
+   "b": {
+    "n": "ff4",
+    "p": 1
+   },
+   "by": "Collab Share example",
+   "t": 33,
+   "z": 0
+  },
+  {
+   "id": "w-reset.0-ff4.3",
+   "type": "wire",
+   "a": {
+    "n": "reset",
+    "p": 0
+   },
+   "b": {
+    "n": "ff4",
+    "p": 3
+   },
+   "by": "Collab Share example",
+   "t": 34,
+   "z": 0
+  },
+  {
+   "id": "w-ff3.0-ff4.0",
+   "type": "wire",
+   "a": {
+    "n": "ff3",
+    "p": 0
+   },
+   "b": {
+    "n": "ff4",
+    "p": 0
+   },
+   "by": "Collab Share example",
+   "t": 35,
+   "z": 0
+  },
+  {
+   "id": "ff5",
+   "type": "node",
+   "kind": "DFF",
+   "x": 1350,
+   "y": 170,
+   "by": "Collab Share example",
+   "t": 36,
+   "z": 37
+  },
+  {
+   "id": "lamp5",
+   "type": "node",
+   "kind": "LAMP",
+   "x": 1482,
+   "y": 20,
+   "by": "Collab Share example",
+   "t": 37,
+   "z": 38,
+   "color": "#ff3131",
+   "rot": 270
+  },
+  {
+   "id": "w-ff5.0-lamp5.0",
+   "type": "wire",
+   "a": {
+    "n": "ff5",
+    "p": 0
+   },
+   "b": {
+    "n": "lamp5",
+    "p": 0
+   },
+   "by": "Collab Share example",
+   "t": 38,
+   "z": 0
+  },
+  {
+   "id": "w-gate.0-ff5.1",
+   "type": "wire",
+   "a": {
+    "n": "gate",
+    "p": 0
+   },
+   "b": {
+    "n": "ff5",
+    "p": 1
+   },
+   "by": "Collab Share example",
+   "t": 39,
+   "z": 0
+  },
+  {
+   "id": "w-reset.0-ff5.3",
+   "type": "wire",
+   "a": {
+    "n": "reset",
+    "p": 0
+   },
+   "b": {
+    "n": "ff5",
+    "p": 3
+   },
+   "by": "Collab Share example",
+   "t": 40,
+   "z": 0
+  },
+  {
+   "id": "w-ff4.0-ff5.0",
+   "type": "wire",
+   "a": {
+    "n": "ff4",
+    "p": 0
+   },
+   "b": {
+    "n": "ff5",
+    "p": 0
+   },
+   "by": "Collab Share example",
+   "t": 41,
+   "z": 0
+  },
+  {
+   "id": "ff6",
+   "type": "node",
+   "kind": "DFF",
+   "x": 1560,
+   "y": 170,
+   "by": "Collab Share example",
+   "t": 42,
+   "z": 43
+  },
+  {
+   "id": "lamp6",
+   "type": "node",
+   "kind": "LAMP",
+   "x": 1692,
+   "y": 20,
+   "by": "Collab Share example",
+   "t": 43,
+   "z": 44,
+   "color": "#ff3131",
+   "rot": 270
+  },
+  {
+   "id": "w-ff6.0-lamp6.0",
+   "type": "wire",
+   "a": {
+    "n": "ff6",
+    "p": 0
+   },
+   "b": {
+    "n": "lamp6",
+    "p": 0
+   },
+   "by": "Collab Share example",
+   "t": 44,
+   "z": 0
+  },
+  {
+   "id": "w-gate.0-ff6.1",
+   "type": "wire",
+   "a": {
+    "n": "gate",
+    "p": 0
+   },
+   "b": {
+    "n": "ff6",
+    "p": 1
+   },
+   "by": "Collab Share example",
+   "t": 45,
+   "z": 0
+  },
+  {
+   "id": "w-reset.0-ff6.3",
+   "type": "wire",
+   "a": {
+    "n": "reset",
+    "p": 0
+   },
+   "b": {
+    "n": "ff6",
+    "p": 3
+   },
+   "by": "Collab Share example",
+   "t": 46,
+   "z": 0
+  },
+  {
+   "id": "w-ff5.0-ff6.0",
+   "type": "wire",
+   "a": {
+    "n": "ff5",
+    "p": 0
+   },
+   "b": {
+    "n": "ff6",
+    "p": 0
+   },
+   "by": "Collab Share example",
+   "t": 47,
+   "z": 0
+  },
+  {
+   "id": "ff7",
+   "type": "node",
+   "kind": "DFF",
+   "x": 1770,
+   "y": 170,
+   "by": "Collab Share example",
+   "t": 48,
+   "z": 49
+  },
+  {
+   "id": "lamp7",
+   "type": "node",
+   "kind": "LAMP",
+   "x": 1902,
+   "y": 20,
+   "by": "Collab Share example",
+   "t": 49,
+   "z": 50,
+   "color": "#ff3131",
+   "rot": 270
+  },
+  {
+   "id": "w-ff7.0-lamp7.0",
+   "type": "wire",
+   "a": {
+    "n": "ff7",
+    "p": 0
+   },
+   "b": {
+    "n": "lamp7",
+    "p": 0
+   },
+   "by": "Collab Share example",
+   "t": 50,
+   "z": 0
+  },
+  {
+   "id": "w-gate.0-ff7.1",
+   "type": "wire",
+   "a": {
+    "n": "gate",
+    "p": 0
+   },
+   "b": {
+    "n": "ff7",
+    "p": 1
+   },
+   "by": "Collab Share example",
+   "t": 51,
+   "z": 0
+  },
+  {
+   "id": "w-reset.0-ff7.3",
+   "type": "wire",
+   "a": {
+    "n": "reset",
+    "p": 0
+   },
+   "b": {
+    "n": "ff7",
+    "p": 3
+   },
+   "by": "Collab Share example",
+   "t": 52,
+   "z": 0
+  },
+  {
+   "id": "w-ff6.0-ff7.0",
+   "type": "wire",
+   "a": {
+    "n": "ff6",
+    "p": 0
+   },
+   "b": {
+    "n": "ff7",
+    "p": 0
+   },
+   "by": "Collab Share example",
+   "t": 53,
+   "z": 0
+  },
+  {
+   "id": "or1",
+   "type": "node",
+   "kind": "OR",
+   "x": 610,
+   "y": 320,
+   "by": "Collab Share example",
+   "t": 54,
+   "z": 55
+  },
+  {
+   "id": "w-ff0.0-or1.0",
+   "type": "wire",
+   "a": {
+    "n": "ff0",
+    "p": 0
+   },
+   "b": {
+    "n": "or1",
+    "p": 0
+   },
+   "by": "Collab Share example",
+   "t": 55,
+   "z": 0
+  },
+  {
+   "id": "w-ff1.0-or1.1",
+   "type": "wire",
+   "a": {
+    "n": "ff1",
+    "p": 0
+   },
+   "b": {
+    "n": "or1",
+    "p": 1
+   },
+   "by": "Collab Share example",
+   "t": 56,
+   "z": 0
+  },
+  {
+   "id": "or2",
+   "type": "node",
+   "kind": "OR",
+   "x": 820,
+   "y": 320,
+   "by": "Collab Share example",
+   "t": 57,
+   "z": 58
+  },
+  {
+   "id": "w-or1.0-or2.0",
+   "type": "wire",
+   "a": {
+    "n": "or1",
+    "p": 0
+   },
+   "b": {
+    "n": "or2",
+    "p": 0
+   },
+   "by": "Collab Share example",
+   "t": 58,
+   "z": 0
+  },
+  {
+   "id": "w-ff2.0-or2.1",
+   "type": "wire",
+   "a": {
+    "n": "ff2",
+    "p": 0
+   },
+   "b": {
+    "n": "or2",
+    "p": 1
+   },
+   "by": "Collab Share example",
+   "t": 59,
+   "z": 0
+  },
+  {
+   "id": "or3",
+   "type": "node",
+   "kind": "OR",
+   "x": 1030,
+   "y": 320,
+   "by": "Collab Share example",
+   "t": 60,
+   "z": 61
+  },
+  {
+   "id": "w-or2.0-or3.0",
+   "type": "wire",
+   "a": {
+    "n": "or2",
+    "p": 0
+   },
+   "b": {
+    "n": "or3",
+    "p": 0
+   },
+   "by": "Collab Share example",
+   "t": 61,
+   "z": 0
+  },
+  {
+   "id": "w-ff3.0-or3.1",
+   "type": "wire",
+   "a": {
+    "n": "ff3",
+    "p": 0
+   },
+   "b": {
+    "n": "or3",
+    "p": 1
+   },
+   "by": "Collab Share example",
+   "t": 62,
+   "z": 0
+  },
+  {
+   "id": "or4",
+   "type": "node",
+   "kind": "OR",
+   "x": 1240,
+   "y": 320,
+   "by": "Collab Share example",
+   "t": 63,
+   "z": 64
+  },
+  {
+   "id": "w-or3.0-or4.0",
+   "type": "wire",
+   "a": {
+    "n": "or3",
+    "p": 0
+   },
+   "b": {
+    "n": "or4",
+    "p": 0
+   },
+   "by": "Collab Share example",
+   "t": 64,
+   "z": 0
+  },
+  {
+   "id": "w-ff4.0-or4.1",
+   "type": "wire",
+   "a": {
+    "n": "ff4",
+    "p": 0
+   },
+   "b": {
+    "n": "or4",
+    "p": 1
+   },
+   "by": "Collab Share example",
+   "t": 65,
+   "z": 0
+  },
+  {
+   "id": "or5",
+   "type": "node",
+   "kind": "OR",
+   "x": 1450,
+   "y": 320,
+   "by": "Collab Share example",
+   "t": 66,
+   "z": 67
+  },
+  {
+   "id": "w-or4.0-or5.0",
+   "type": "wire",
+   "a": {
+    "n": "or4",
+    "p": 0
+   },
+   "b": {
+    "n": "or5",
+    "p": 0
+   },
+   "by": "Collab Share example",
+   "t": 67,
+   "z": 0
+  },
+  {
+   "id": "w-ff5.0-or5.1",
+   "type": "wire",
+   "a": {
+    "n": "ff5",
+    "p": 0
+   },
+   "b": {
+    "n": "or5",
+    "p": 1
+   },
+   "by": "Collab Share example",
+   "t": 68,
+   "z": 0
+  },
+  {
+   "id": "or6",
+   "type": "node",
+   "kind": "OR",
+   "x": 1660,
+   "y": 320,
+   "by": "Collab Share example",
+   "t": 69,
+   "z": 70
+  },
+  {
+   "id": "w-or5.0-or6.0",
+   "type": "wire",
+   "a": {
+    "n": "or5",
+    "p": 0
+   },
+   "b": {
+    "n": "or6",
+    "p": 0
+   },
+   "by": "Collab Share example",
+   "t": 70,
+   "z": 0
+  },
+  {
+   "id": "w-ff6.0-or6.1",
+   "type": "wire",
+   "a": {
+    "n": "ff6",
+    "p": 0
+   },
+   "b": {
+    "n": "or6",
+    "p": 1
+   },
+   "by": "Collab Share example",
+   "t": 71,
+   "z": 0
+  },
+  {
+   "id": "not",
+   "type": "node",
+   "kind": "NOT",
+   "x": 1870,
+   "y": 320,
+   "by": "Collab Share example",
+   "t": 72,
+   "z": 73
+  },
+  {
+   "id": "w-or6.0-not.0",
+   "type": "wire",
+   "a": {
+    "n": "or6",
+    "p": 0
+   },
+   "b": {
+    "n": "not",
+    "p": 0
+   },
+   "by": "Collab Share example",
+   "t": 73,
+   "z": 0
+  },
+  {
+   "id": "w-not.0-ff0.0",
+   "type": "wire",
+   "a": {
+    "n": "not",
+    "p": 0
+   },
+   "b": {
+    "n": "ff0",
+    "p": 0
+   },
+   "by": "Collab Share example",
+   "t": 74,
+   "z": 0
+  },
+  {
+   "id": "note",
+   "type": "note",
+   "x": 0,
+   "y": 460,
+   "w": 280,
+   "h": 150,
+   "color": "#ffd166",
+   "by": "Collab Share example",
+   "t": 75,
+   "z": 76,
+   "text": "Running light: 8 D flip-flops share one clock. Each D takes the previous Q, so the light moves one lamp per tick. The first D = NOT(lamps 1-7): a new light enters when it reaches the end. Lever = run/pause. Button = reset. Double-click the Clock to change the speed."
+  }
+ ]
+}

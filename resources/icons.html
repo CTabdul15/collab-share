@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<!-- Icon options for Collab Share. Each SVG is rendered to PNG by the script at the bottom. -->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Icon options</title>
+<style>
+  body { margin: 0; padding: 24px; background: #1e1e1e; color: #ddd; font: 14px "Segoe UI", sans-serif; }
+  .row { display: flex; gap: 28px; }
+  .opt { text-align: center; }
+  .opt .big { width: 200px; height: 200px; }
+  .opt .small { display: flex; gap: 10px; justify-content: center; align-items: center; margin-top: 10px; }
+  .opt h3 { margin: 10px 0 2px; font-size: 22px; color: #fff; }
+  .light { background: #f3f3f3; padding: 6px; border-radius: 4px; }
+</style>
+</head>
+<body>
+<div class="row" id="row"></div>
+<script>
+const ICONS = {
+  // A: code brackets joined by a live wire
+  A: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+    <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2b5ee8"/><stop offset="1" stop-color="#14267a"/></linearGradient>
+    <filter id="glow"><feGaussianBlur stdDeviation="2.2"/></filter></defs>
+    <rect x="4" y="4" width="120" height="120" rx="28" fill="url(#g)"/>
+    <path d="M44 38 L20 64 L44 90" fill="none" stroke="#fff" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M84 38 L108 64 L84 90" fill="none" stroke="#fff" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M74 32 L54 96" stroke="#ff3b3b" stroke-width="9" stroke-linecap="round" filter="url(#glow)" opacity=".8"/>
+    <path d="M74 32 L54 96" stroke="#ff4d4d" stroke-width="7" stroke-linecap="round"/>
+    <circle cx="74" cy="32" r="7.5" fill="#fff"/><circle cx="54" cy="96" r="7.5" fill="#fff"/>
+  </svg>`,
+  // B: two cursors with name tags (you + a friend)
+  B: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+    <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7b2ff7"/><stop offset="1" stop-color="#2563eb"/></linearGradient></defs>
+    <rect x="4" y="4" width="120" height="120" rx="28" fill="url(#g)"/>
+    <rect x="22" y="30" width="56" height="7" rx="3.5" fill="#fff" opacity=".25"/>
+    <rect x="22" y="46" width="78" height="7" rx="3.5" fill="#fff" opacity=".25"/>
+    <rect x="22" y="62" width="44" height="7" rx="3.5" fill="#fff" opacity=".25"/>
+    <rect x="22" y="78" width="66" height="7" rx="3.5" fill="#fff" opacity=".25"/>
+    <path d="M30 22 L30 64 L41 54 L49 72 L56 69 L48 51 L63 51 Z" fill="#fff" stroke="#1b1464" stroke-width="3" stroke-linejoin="round"/>
+    <path d="M70 52 L70 94 L81 84 L89 102 L96 99 L88 81 L103 81 Z" fill="#ff4d6d" stroke="#1b1464" stroke-width="3" stroke-linejoin="round"/>
+  </svg>`,
+  // C: two people sharing one code block
+  C: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+    <rect x="4" y="4" width="120" height="120" rx="28" fill="#0f172a"/>
+    <circle cx="44" cy="40" r="15" fill="#22d3ee"/><path d="M18 76 a26 22 0 0 1 52 0 Z" fill="#22d3ee"/>
+    <circle cx="84" cy="40" r="15" fill="#fb923c"/><path d="M58 76 a26 22 0 0 1 52 0 Z" fill="#fb923c"/>
+    <rect x="16" y="82" width="96" height="30" rx="9" fill="#1e293b" stroke="#475569" stroke-width="2"/>
+    <text x="64" y="104" font-family="Consolas, monospace" font-weight="700" font-size="22" fill="#e2e8f0" text-anchor="middle">{ // }</text>
+  </svg>`,
+  // D: two overlapping files with a shared, live cursor
+  D: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+    <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0ea5a4"/><stop offset="1" stop-color="#0b4f6c"/></linearGradient></defs>
+    <rect x="4" y="4" width="120" height="120" rx="28" fill="url(#g)"/>
+    <rect x="22" y="22" width="56" height="70" rx="8" fill="#ffffff" opacity=".55"/>
+    <rect x="46" y="36" width="60" height="72" rx="8" fill="#fff"/>
+    <rect x="56" y="50" width="30" height="6" rx="3" fill="#0ea5a4"/>
+    <rect x="56" y="62" width="40" height="6" rx="3" fill="#94a3b8"/>
+    <rect x="56" y="74" width="22" height="6" rx="3" fill="#f97316"/>
+    <rect x="56" y="86" width="34" height="6" rx="3" fill="#94a3b8"/>
+    <rect x="80" y="70" width="3.5" height="16" fill="#ef4444"/>
+    <rect x="80" y="62" width="22" height="9" rx="3" fill="#ef4444"/>
+  </svg>`,
+};
+const row = document.getElementById('row');
+for (const [k, svg] of Object.entries(ICONS)) {
+  const url = 'data:image/svg+xml;base64,' + btoa(svg);
+  row.insertAdjacentHTML('beforeend', `<div class="opt"><img class="big" src="${url}"><div class="small"><img src="${url}" width="48"><img src="${url}" width="32"><img src="${url}" width="20"><span class="light"><img src="${url}" width="32"></span></div><h3>${k}</h3></div>`);
+}
+// Render an option to a PNG data URL (for saving as resources/icon.png).
+window.renderIcon = async (k, size = 256) => {
+  const img = new Image();
+  img.src = 'data:image/svg+xml;base64,' + btoa(ICONS[k]);
+  await img.decode();
+  const c = document.createElement('canvas'); c.width = c.height = size;
+  c.getContext('2d').drawImage(img, 0, 0, size, size);
+  return c.toDataURL('image/png');
+};
+</script>
+</body>
+</html>

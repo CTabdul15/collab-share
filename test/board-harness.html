@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<!-- Opens the whiteboard outside VS Code for interaction testing: a fake extension echoes changes back. -->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Whiteboard harness</title>
+<link rel="stylesheet" href="../media/whiteboard.css">
+<script>
+  const store = new Map();
+  window.__sent = [];
+  window.acquireVsCodeApi = () => ({
+    postMessage(m) {
+      window.__sent.push(m);
+      if (m.type === 'ready') {
+        setTimeout(() => window.postMessage({ type: 'init', me: { id: 1, name: 'Tester', color: '#ff6b6b' }, readOnly: false, shapes: [] }, '*'), 0);
+      } else if (m.type === 'batch') {
+        for (const id of m.del || []) store.delete(id);
+        for (const s of m.set || []) store.set(s.id, s);
+        hostStep();
+        setTimeout(() => window.postMessage({ type: 'shapes', shapes: [...store.values()] }, '*'), 10);
+      }
+    },
+  });
+  window.__store = store;
+  // Stand-in for the host (src/boardLogic.ts): run the simulator at 20 ticks/s and stream it.
+  let sim = null;
+  function hostStep() {
+    sim = sim || new window.CollabCircuit.Sim();
+    for (const s of store.values()) if (s.kind === 'BUTTON' && s.value) sim.press(s.id);
+    sim.load([...store.values()]);
+    push();
+  }
+  function push() { window.postMessage({ type: 'sim', sim: sim.snapshot() }, '*'); }
+  setInterval(() => { if (sim) { sim.step(); push(); } }, 50);
+  window.__sim = () => sim;
+</script>
+</head>
+<body>
+<canvas id="c" tabindex="0"></canvas>
+<div id="bar" class="bar">
+  <button data-tool="select">select</button><button data-tool="hand">hand</button>
+  <button data-tool="pen">pen</button><button data-tool="rect">rect</button><button data-tool="note">note</button><button data-tool="eraser">eraser</button>
+  <button data-tool="nodes"><span>Nodes</span></button>
+  <button class="sw" data-color="#ffffff"></button><button class="sw" data-color="#ff6b6b"></button>
+  <input id="custom" type="color" value="#ffffff">
+  <button data-width="2">w2</button><button data-width="4">w4</button>
+  <button id="dash">dash</button><button id="fill">fill</button><button id="snap">snap</button><button id="wirestyle">square</button><button id="open">open</button><button id="sound"><span>Sound</span></button>
+  <button id="undo">undo</button><button id="redo">redo</button><button id="fit">fit</button><button id="export">export</button>
+  <button id="clear"><span>Clear</span></button>
+</div>
+<div id="selbar" class="bar"><span id="selcount"></span><button id="dup">dup</button><button id="front">front</button><button id="back">back</button><button id="rotl">rotl</button><button id="rotr">rotr</button><button id="del">del</button></div>
+<div id="nodes"><button data-node="SWITCH">SWITCH</button><button data-node="AND">AND</button><button data-node="NOT">NOT</button><button data-node="LAMP">LAMP</button><button data-node="NUMBER">NUMBER</button><button data-node="CLAMP">CLAMP</button><button data-node="DISPLAY">DISPLAY</button><button data-node="BUTTON">BUTTON</button><button data-node="LEVER">LEVER</button><button data-node="TFF">TFF</button><button data-node="DFF">DFF</button><button data-node="JKFF">JKFF</button><button data-node="SR">SR</button><button data-node="DLATCH">DLATCH</button><button data-node="COUNTER">COUNTER</button><button data-node="CLOCK">CLOCK</button><button data-node="DELAY">DELAY</button><button data-node="PULSE">PULSE</button><button data-node="MOTOR">MOTOR</button><button data-node="SEG7">SEG7</button><button data-node="BUZZER">BUZZER</button><button data-node="NOTE">NOTE</button><button data-node="AND3">AND3</button><button data-node="DRUMKIT">DRUMKIT</button></div>
+<div id="ro"></div>
+<textarea id="edit"></textarea><div id="props"></div>
+<div id="title"><div>Harness</div><div><span id="authors"></span></div><div><span id="scale"></span></div></div>
+<div id="hint"></div>
+<script src="../media/circuit.js"></script>
+<script src="../media/whiteboard.js"></script>
+</body>
+</html>

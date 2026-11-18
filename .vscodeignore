@@ -1,0 +1,17 @@
+**/*.map
+**/*.ts
+*.vsix
+.claude/**
+.vscode/**
+PUBLISHING.md
+esbuild.mjs
+examples/*.cjs
+images/**
+node_modules/**
+out/**
+resources/*.ps1
+resources/icon-options.jpg
+resources/icons.html
+src/**
+test/**
+tsconfig.json

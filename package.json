@@ -1,0 +1,573 @@
+{
+  "name": "collab-share",
+  "displayName": "Collab Share",
+  "description": "Free Live Share alternative: code together in real time with friends anywhere. Shared editing, cursors, IntelliSense from the host, and a blueprint whiteboard with a live logic simulator.",
+  "version": "1.0.0",
+  "publisher": "CTabdul15",
+  "icon": "resources/icon.png",
+  "galleryBanner": {
+    "color": "#123f7a",
+    "theme": "dark"
+  },
+  "license": "MIT",
+  "pricing": "Free",
+  "categories": [
+    "Other",
+    "Visualization",
+    "Education"
+  ],
+  "keywords": [
+    "live share",
+    "collaboration",
+    "pair programming",
+    "real-time",
+    "co-editing",
+    "multiplayer",
+    "whiteboard",
+    "logic gates",
+    "remote",
+    "share"
+  ],
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "main": "./dist/extension.js",
+  "activationEvents": [
+    "onFileSystem:collab",
+    "onStartupFinished"
+  ],
+  "capabilities": {
+    "virtualWorkspaces": true,
+    "untrustedWorkspaces": {
+      "supported": true
+    }
+  },
+  "contributes": {
+    "commands": [
+      {
+        "command": "collab.host",
+        "title": "Start Hosting Session",
+        "category": "Collab",
+        "icon": "$(broadcast)"
+      },
+      {
+        "command": "collab.hostReadWrite",
+        "title": "Share (Read/Write)",
+        "category": "Collab",
+        "icon": "$(broadcast)"
+      },
+      {
+        "command": "collab.hostReadOnly",
+        "title": "Share (Read-Only)",
+        "category": "Collab",
+        "icon": "$(lock)"
+      },
+      {
+        "command": "collab.join",
+        "title": "Join Session",
+        "category": "Collab",
+        "icon": "$(plug)"
+      },
+      {
+        "command": "collab.stop",
+        "title": "Stop / Leave Session",
+        "category": "Collab",
+        "icon": "$(debug-stop)"
+      },
+      {
+        "command": "collab.copyInvite",
+        "title": "Copy Invite Link",
+        "category": "Collab",
+        "icon": "$(copy)"
+      },
+      {
+        "command": "collab.findFile",
+        "title": "Find File in Shared Workspace",
+        "category": "Collab",
+        "icon": "$(search)"
+      },
+      {
+        "command": "collab.restartTunnel",
+        "title": "Restart Internet Link",
+        "category": "Collab",
+        "icon": "$(globe)"
+      },
+      {
+        "command": "collab.menu",
+        "title": "Session Menu",
+        "category": "Collab"
+      },
+      {
+        "command": "collab.goToPeer",
+        "title": "Go to Participant",
+        "category": "Collab"
+      },
+      {
+        "command": "collab.follow",
+        "title": "Follow",
+        "category": "Collab",
+        "icon": "$(pin)"
+      },
+      {
+        "command": "collab.unfollow",
+        "title": "Stop Following",
+        "category": "Collab",
+        "icon": "$(pinned)"
+      },
+      {
+        "command": "collab.undo",
+        "title": "Undo My Last Change",
+        "category": "Collab"
+      },
+      {
+        "command": "collab.redo",
+        "title": "Redo My Last Change",
+        "category": "Collab"
+      },
+      {
+        "command": "collab.setReadOnly",
+        "title": "Make Read-Only",
+        "category": "Collab",
+        "icon": "$(lock)"
+      },
+      {
+        "command": "collab.setReadWrite",
+        "title": "Allow Editing",
+        "category": "Collab",
+        "icon": "$(unlock)"
+      },
+      {
+        "command": "collab.whiteboard",
+        "title": "Open Whiteboard",
+        "category": "Collab",
+        "icon": "$(symbol-color)"
+      },
+      {
+        "command": "collab.setPicture",
+        "title": "Set My Picture…",
+        "category": "Collab",
+        "icon": "$(account)"
+      },
+      {
+        "command": "collab.changeColor",
+        "title": "Change Color…",
+        "category": "Collab",
+        "icon": "$(symbol-color)"
+      }
+    ],
+    "views": {
+      "collab": [
+        {
+          "id": "collab.session",
+          "name": "Session Details"
+        },
+        {
+          "id": "collab.participants",
+          "name": "Participants"
+        }
+      ]
+    },
+    "viewsWelcome": [
+      {
+        "view": "collab.session",
+        "contents": "Start collaboratively editing with others in real-time.\n[Share (Read/Write)](command:collab.hostReadWrite)\n[Share (Read-Only)](command:collab.hostReadOnly)\n[Join](command:collab.join)",
+        "when": "!collab.role"
+      },
+      {
+        "view": "collab.participants",
+        "contents": "No one else is here yet. Share the invite link with your friends.\n[Copy Invite Link](command:collab.copyInvite)",
+        "when": "collab.role == host"
+      },
+      {
+        "view": "collab.participants",
+        "contents": "Start or join a session to see participants here.",
+        "when": "!collab.role"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "collab.whiteboard",
+          "when": "view == collab.session && collab.role",
+          "group": "navigation@0"
+        },
+        {
+          "command": "collab.copyInvite",
+          "when": "view == collab.session && collab.role == host",
+          "group": "navigation@1"
+        },
+        {
+          "command": "collab.findFile",
+          "when": "view == collab.session && collab.role == guest",
+          "group": "navigation@1"
+        },
+        {
+          "command": "collab.stop",
+          "when": "view == collab.session && collab.role",
+          "group": "navigation@9"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "collab.follow",
+          "when": "view == collab.participants && viewItem =~ /notfollowing/",
+          "group": "inline@1"
+        },
+        {
+          "command": "collab.unfollow",
+          "when": "view == collab.participants && viewItem =~ /(^| )following/",
+          "group": "inline@1"
+        },
+        {
+          "command": "collab.setReadOnly",
+          "when": "view == collab.participants && viewItem =~ /guest-rw/",
+          "group": "inline@2"
+        },
+        {
+          "command": "collab.setReadWrite",
+          "when": "view == collab.participants && viewItem =~ /guest-ro/",
+          "group": "inline@2"
+        },
+        {
+          "command": "collab.goToPeer",
+          "when": "view == collab.participants && viewItem =~ /following/",
+          "group": "1_peer@1"
+        },
+        {
+          "command": "collab.follow",
+          "when": "view == collab.participants && viewItem =~ /notfollowing/",
+          "group": "1_peer@2"
+        },
+        {
+          "command": "collab.unfollow",
+          "when": "view == collab.participants && viewItem =~ /(^| )following/",
+          "group": "1_peer@2"
+        },
+        {
+          "command": "collab.setReadOnly",
+          "when": "view == collab.participants && viewItem =~ /guest-rw/",
+          "group": "2_perm"
+        },
+        {
+          "command": "collab.setReadWrite",
+          "when": "view == collab.participants && viewItem =~ /guest-ro/",
+          "group": "2_perm"
+        },
+        {
+          "command": "collab.changeColor",
+          "when": "view == collab.participants && viewItem =~ /recolor/",
+          "group": "inline@3"
+        },
+        {
+          "command": "collab.changeColor",
+          "when": "view == collab.participants && viewItem =~ /recolor/",
+          "group": "2_perm@2"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "collab.goToPeer",
+          "when": "false"
+        },
+        {
+          "command": "collab.follow",
+          "when": "false"
+        },
+        {
+          "command": "collab.unfollow",
+          "when": "collab.role"
+        },
+        {
+          "command": "collab.findFile",
+          "when": "collab.role == guest"
+        },
+        {
+          "command": "collab.copyInvite",
+          "when": "collab.role == host"
+        },
+        {
+          "command": "collab.restartTunnel",
+          "when": "collab.role == host"
+        },
+        {
+          "command": "collab.hostReadWrite",
+          "when": "!collab.role"
+        },
+        {
+          "command": "collab.hostReadOnly",
+          "when": "!collab.role"
+        },
+        {
+          "command": "collab.undo",
+          "when": "collab.role"
+        },
+        {
+          "command": "collab.redo",
+          "when": "collab.role"
+        },
+        {
+          "command": "collab.setReadOnly",
+          "when": "false"
+        },
+        {
+          "command": "collab.setReadWrite",
+          "when": "false"
+        },
+        {
+          "command": "collab.whiteboard",
+          "when": "collab.role"
+        },
+        {
+          "command": "collab.changeColor",
+          "when": "false"
+        }
+      ]
+    },
+    "keybindings": [
+      {
+        "command": "collab.findFile",
+        "key": "ctrl+alt+p",
+        "mac": "cmd+alt+p",
+        "when": "collab.role == guest"
+      },
+      {
+        "command": "collab.undo",
+        "key": "ctrl+z",
+        "mac": "cmd+z",
+        "when": "editorTextFocus && !editorReadonly && collab.role"
+      },
+      {
+        "command": "collab.redo",
+        "key": "ctrl+y",
+        "mac": "cmd+shift+z",
+        "when": "editorTextFocus && !editorReadonly && collab.role"
+      },
+      {
+        "command": "collab.redo",
+        "key": "ctrl+shift+z",
+        "when": "editorTextFocus && !editorReadonly && collab.role"
+      }
+    ],
+    "configuration": {
+      "title": "Collab Share",
+      "properties": {
+        "collab.displayName": {
+          "type": "string",
+          "default": "",
+          "description": "Your name as shown to other participants."
+        },
+        "collab.port": {
+          "type": "number",
+          "default": 7171,
+          "description": "Port the host listens on."
+        },
+        "collab.shareOverInternet": {
+          "type": "boolean",
+          "default": true,
+          "description": "When hosting, automatically create a free Cloudflare link (…trycloudflare.com) so friends on other networks can join. Requires cloudflared on the host's computer."
+        },
+        "collab.cloudflaredPath": {
+          "type": "string",
+          "default": "",
+          "description": "Path to the cloudflared executable, if it isn't found automatically."
+        },
+        "collab.publicUrl": {
+          "type": "string",
+          "default": "",
+          "description": "When hosting through a tunnel (cloudflared, ngrok, VS Code port forwarding), the public URL that forwards to your port, e.g. https://abc.trycloudflare.com. Used to build the invite link."
+        }
+      }
+    },
+    "colors": [
+      {
+        "id": "collab.participant0",
+        "description": "Color of collaborator #0 (file highlights)",
+        "defaults": {
+          "dark": "#ff5c7a",
+          "light": "#e6194b",
+          "highContrast": "#ff5c7a",
+          "highContrastLight": "#e6194b"
+        }
+      },
+      {
+        "id": "collab.participant1",
+        "description": "Color of collaborator #1 (file highlights)",
+        "defaults": {
+          "dark": "#5fd068",
+          "light": "#3cb44b",
+          "highContrast": "#5fd068",
+          "highContrastLight": "#3cb44b"
+        }
+      },
+      {
+        "id": "collab.participant2",
+        "description": "Color of collaborator #2 (file highlights)",
+        "defaults": {
+          "dark": "#6f8dff",
+          "light": "#4363d8",
+          "highContrast": "#6f8dff",
+          "highContrastLight": "#4363d8"
+        }
+      },
+      {
+        "id": "collab.participant3",
+        "description": "Color of collaborator #3 (file highlights)",
+        "defaults": {
+          "dark": "#ff9d4d",
+          "light": "#f58231",
+          "highContrast": "#ff9d4d",
+          "highContrastLight": "#f58231"
+        }
+      },
+      {
+        "id": "collab.participant4",
+        "description": "Color of collaborator #4 (file highlights)",
+        "defaults": {
+          "dark": "#c27bff",
+          "light": "#911eb4",
+          "highContrast": "#c27bff",
+          "highContrastLight": "#911eb4"
+        }
+      },
+      {
+        "id": "collab.participant5",
+        "description": "Color of collaborator #5 (file highlights)",
+        "defaults": {
+          "dark": "#42d4f4",
+          "light": "#42d4f4",
+          "highContrast": "#42d4f4",
+          "highContrastLight": "#42d4f4"
+        }
+      },
+      {
+        "id": "collab.participant6",
+        "description": "Color of collaborator #6 (file highlights)",
+        "defaults": {
+          "dark": "#ff6bf3",
+          "light": "#f032e6",
+          "highContrast": "#ff6bf3",
+          "highContrastLight": "#f032e6"
+        }
+      },
+      {
+        "id": "collab.participant7",
+        "description": "Color of collaborator #7 (file highlights)",
+        "defaults": {
+          "dark": "#d39a52",
+          "light": "#9a6324",
+          "highContrast": "#d39a52",
+          "highContrastLight": "#9a6324"
+        }
+      },
+      {
+        "id": "collab.participant8",
+        "description": "Color of collaborator #8 (file highlights)",
+        "defaults": {
+          "dark": "#5fc4b8",
+          "light": "#469990",
+          "highContrast": "#5fc4b8",
+          "highContrastLight": "#469990"
+        }
+      },
+      {
+        "id": "collab.participant9",
+        "description": "Color of collaborator #9 (file highlights)",
+        "defaults": {
+          "dark": "#ff6b6b",
+          "light": "#800000",
+          "highContrast": "#ff6b6b",
+          "highContrastLight": "#800000"
+        }
+      },
+      {
+        "id": "collab.participant10",
+        "description": "Color of collaborator #10 (file highlights)",
+        "defaults": {
+          "dark": "#c9c94a",
+          "light": "#808000",
+          "highContrast": "#c9c94a",
+          "highContrastLight": "#808000"
+        }
+      },
+      {
+        "id": "collab.participant11",
+        "description": "Color of collaborator #11 (file highlights)",
+        "defaults": {
+          "dark": "#7b8cff",
+          "light": "#000075",
+          "highContrast": "#7b8cff",
+          "highContrastLight": "#000075"
+        }
+      },
+      {
+        "id": "collab.participant12",
+        "description": "Color of collaborator #12 (file highlights)",
+        "defaults": {
+          "dark": "#bfef45",
+          "light": "#bfef45",
+          "highContrast": "#bfef45",
+          "highContrastLight": "#bfef45"
+        }
+      },
+      {
+        "id": "collab.participant13",
+        "description": "Color of collaborator #13 (file highlights)",
+        "defaults": {
+          "dark": "#fabed4",
+          "light": "#fabed4",
+          "highContrast": "#fabed4",
+          "highContrastLight": "#fabed4"
+        }
+      },
+      {
+        "id": "collab.participant14",
+        "description": "Color of collaborator #14 (file highlights)",
+        "defaults": {
+          "dark": "#dcbeff",
+          "light": "#dcbeff",
+          "highContrast": "#dcbeff",
+          "highContrastLight": "#dcbeff"
+        }
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "collab",
+          "title": "Collab Share",
+          "icon": "resources/collab.svg"
+        }
+      ]
+    },
+    "resourceLabelFormatters": [
+      {
+        "scheme": "collab",
+        "authority": "*",
+        "formatting": {
+          "label": "${path}",
+          "separator": "/",
+          "workspaceSuffix": "Collab Share"
+        }
+      }
+    ]
+  },
+  "scripts": {
+    "build": "node esbuild.mjs",
+    "watch": "node esbuild.mjs --watch",
+    "typecheck": "tsc --noEmit",
+    "test": "node esbuild.mjs && node test/run.mjs",
+    "package": "npm run typecheck && node esbuild.mjs --production && vsce package --no-dependencies --allow-missing-repository"
+  },
+  "dependencies": {
+    "ws": "^8.18.0",
+    "yjs": "^13.6.20"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "@types/vscode": "~1.85.0",
+    "@types/ws": "^8.5.12",
+    "@vscode/vsce": "^3.2.1",
+    "esbuild": "^0.24.0",
+    "typescript": "^5.6.0"
+  }
+}
