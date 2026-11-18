@@ -2,7 +2,7 @@
   "name": "collab-share",
   "displayName": "Collab Share",
   "description": "Free Live Share alternative: code together in real time with friends anywhere. Shared editing, cursors, IntelliSense from the host, and a blueprint whiteboard with a live logic simulator.",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "publisher": "CTabdul15",
   "icon": "resources/icon.png",
   "galleryBanner": {
@@ -10,6 +10,14 @@
     "theme": "dark"
   },
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/CTabdul15/collab-share.git"
+  },
+  "bugs": {
+    "url": "https://github.com/CTabdul15/collab-share/issues"
+  },
+  "homepage": "https://github.com/CTabdul15/collab-share#readme",
   "pricing": "Free",
   "categories": [
     "Other",
@@ -33,8 +41,7 @@
   },
   "main": "./dist/extension.js",
   "activationEvents": [
-    "onFileSystem:collab",
-    "onStartupFinished"
+    "onFileSystem:collab"
   ],
   "capabilities": {
     "virtualWorkspaces": true,
@@ -556,7 +563,7 @@
     "watch": "node esbuild.mjs --watch",
     "typecheck": "tsc --noEmit",
     "test": "node esbuild.mjs && node test/run.mjs",
-    "package": "npm run typecheck && node esbuild.mjs --production && vsce package --no-dependencies --allow-missing-repository"
+    "package": "npm run typecheck && node esbuild.mjs --production && vsce package --no-dependencies"
   },
   "dependencies": {
     "ws": "^8.18.0",

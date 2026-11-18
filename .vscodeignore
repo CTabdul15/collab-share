@@ -15,3 +15,6 @@ resources/icons.html
 src/**
 test/**
 tsconfig.json
+*.board.json
+!examples/*.board.json
+.gitignore

@@ -59,8 +59,36 @@ export function colorFor(id: number): string {
 
 /** Theme color id contributed in package.json for a participant color (used by file highlights and icons). */
 export function themeColorFor(color: string): string {
-  const i = COLORS.indexOf(color.toLowerCase());
-  return `collab.participant${i < 0 ? 0 : i}`;
+  return `collab.participant${nearestColorIndex(color)}`;
+}
+
+/** Turns "#abc", "abc" or "#AABBCC" into "#aabbcc"; undefined if it isn't a hex color. */
+export function normalizeHexColor(s: string): string | undefined {
+  let h = s.trim().toLowerCase().replace(/^#/, '');
+  if (/^[0-9a-f]{3}$/.test(h)) h = h.split('').map((c) => c + c).join('');
+  return /^[0-9a-f]{6}$/.test(h) ? '#' + h : undefined;
+}
+
+/**
+ * Palette slot closest to a color. Icons and file highlights can only use the
+ * theme colors contributed in package.json, so custom colors use the nearest one there.
+ */
+export function nearestColorIndex(color: string): number {
+  const hex = normalizeHexColor(color);
+  if (!hex) return 0;
+  const exact = COLORS.indexOf(hex);
+  if (exact >= 0) return exact;
+  const rgb = (h: string) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
+  const [r, g, b] = rgb(hex);
+  let best = 0;
+  let bestD = Infinity;
+  COLORS.forEach((c, i) => {
+    const [r2, g2, b2] = rgb(c);
+    // Weighted RGB distance (closer to how eyes see it than plain RGB).
+    const d = 2 * (r - r2) ** 2 + 4 * (g - g2) ** 2 + 3 * (b - b2) ** 2;
+    if (d < bestD) { bestD = d; best = i; }
+  });
+  return best;
 }
 
 export const COLOR_NAMES = [

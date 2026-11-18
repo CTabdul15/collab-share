@@ -66,7 +66,7 @@ The first time you host over the Internet, Collab Share asks once to download **
 Say "Not now" to share on your local network only. Windows may ask to allow VS Code through the firewall; that's only needed for local-network links.
 
 ### Joining
-Run **Collab: Join Session** (or click **Collab** in the status bar) and paste the link. A new window opens with the host's files. Use `Ctrl+Alt+P` to find files by name.
+Run **Collab: Join Session** (or use the **Collab Share** icon in the left bar) and paste the link. A new window opens with the host's files. Use `Ctrl+Alt+P` to find files by name.
 
 ### Whiteboard
 - **Tools:** select / move / resize, pen, line, arrow, rectangle, ellipse, diamond, dimension line, text, sticky note, eraser.

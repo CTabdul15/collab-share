@@ -7,7 +7,7 @@ import { WebSocket, WebSocketServer } from 'ws';
 import { Connection } from './connection';
 import { DocBinding } from './binding';
 import { Presence, trackLocalCursor } from './presence';
-import { codeError, colorFor, COLORS, EXT_VERSION, fromB64, Msg, normalizeRel, PeerInfo, PeerSnapshot, PROTOCOL_VERSION, Sel, toB64, validGithubLogin } from './protocol';
+import { codeError, colorFor, EXT_VERSION, normalizeHexColor, fromB64, Msg, normalizeRel, PeerInfo, PeerSnapshot, PROTOCOL_VERSION, Sel, toB64, validGithubLogin } from './protocol';
 import { handleLangRequest, serializeDiagnostics } from './lang';
 import { BoardConnection } from './whiteboard';
 import { BoardLogic } from './boardLogic';
@@ -258,8 +258,9 @@ export class HostSession implements vscode.Disposable {
   }
 
   /** The host changes someone's color (their cursor, pin, file highlights, whiteboard pointer). */
-  setColor(id: number, color: string): void {
-    if (!COLORS.includes(color)) return;
+  setColor(id: number, value: string): void {
+    const color = normalizeHexColor(value);
+    if (!color) return;
     if (id === HOST_ID) {
       this.hostColor = color;
       if (this.boardConn) this.boardConn.me.color = color;

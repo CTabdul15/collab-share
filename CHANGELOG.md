@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.0.2
+
+- Faster startup: Collab Share now only starts when you use it (opening its panel, running a command, or joining), instead of with every VS Code window.
+- Color picker shows the real colors, and the host can type any custom hex color.
+
+## 1.0.1
+
+- New icon and a store page with pictures.
+- Links to the GitHub repository.
+- Smaller package: your own saved whiteboards are no longer included.
+
 ## 1.0.0
 
 First public release.

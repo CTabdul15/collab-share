@@ -10,7 +10,7 @@ import { trace } from './binding';
 import { findCloudflared, Tunnel } from './tunnel';
 import { ensureCloudflared, downloadCloudflared, CLOUDFLARED_VERSION, assetFor, extractFromTar } from './cloudflaredInstall';
 import { Avatars, FollowStatus, ParticipantsTree, peerIdFrom, PeerFileDecorations, SessionTree, UiState } from './ui';
-import { decodeAuthority, EXT_VERSION, normalizeInvite, PROTOCOL_VERSION, SCHEME, validGithubLogin, COLORS, COLOR_NAMES } from './protocol';
+import { decodeAuthority, EXT_VERSION, normalizeInvite, PROTOCOL_VERSION, SCHEME, validGithubLogin, COLORS, COLOR_NAMES, normalizeHexColor } from './protocol';
 import { registerGuestLanguageFeatures } from './lang';
 import { Pins } from './pins';
 import * as boardFile from './boardFile';
@@ -27,17 +27,46 @@ async function changeColor(x: unknown): Promise<void> {
   const id = x === 'self' ? 0 : peerIdFrom(x);
   const info = id === undefined ? undefined : host.infoOf(id);
   if (!info || id === undefined) return;
-  const pick = await vscode.window.showQuickPick(
-    COLORS.map((c, i) => ({
-      label: `${c === info.color ? '$(check) ' : '$(circle-filled) '}${COLOR_NAMES[i]}`,
-      description: c,
-      color: c,
-    })),
-    { placeHolder: `New color for ${id === 0 ? 'you' : info.name}` },
-  );
+  const who = id === 0 ? 'you' : info.name;
+  const current = info.color.toLowerCase();
+  type Item = vscode.QuickPickItem & { color?: string };
+  const item = (name: string, c: string): Item => ({
+    label: name,
+    description: c + (c === current ? '  (current)' : ''),
+    iconPath: swatch(c, c === current),
+    color: c,
+  });
+  const items: Item[] = [];
+  if (!COLORS.includes(current)) items.push(item('Custom', current));
+  items.push(...COLORS.map((c, i) => item(COLOR_NAMES[i], c)));
+  items.push({ label: '', kind: vscode.QuickPickItemKind.Separator });
+  items.push({ label: '$(edit) Custom color…', description: 'type a hex code like #ff8800' });
+
+  const pick = await vscode.window.showQuickPick(items, {
+    placeHolder: `New color for ${who}`,
+    matchOnDescription: true,
+  });
   if (!pick) return;
-  host.setColor(id, pick.color);
+  let color = pick.color;
+  if (!color) {
+    const typed = await vscode.window.showInputBox({
+      title: `Custom color for ${who}`,
+      prompt: 'Hex color, for example #ff8800 or #f80',
+      value: current,
+      validateInput: (v) => (normalizeHexColor(v) ? undefined : 'Use a hex color like #ff8800'),
+    });
+    color = typed === undefined ? undefined : normalizeHexColor(typed);
+    if (!color) return;
+  }
+  host.setColor(id, color);
   updateUi();
+}
+
+/** A filled circle in the given color for the color picker (ring around the current one). */
+function swatch(color: string, current: boolean): vscode.Uri {
+  const ring = current ? '<circle cx="8" cy="8" r="7.2" fill="none" stroke="#ffffff" stroke-width="1.6"/>' : '';
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16"><circle cx="8" cy="8" r="${current ? 5 : 6.5}" fill="${color}" stroke="#808080" stroke-opacity="0.5" stroke-width="0.8"/>${ring}</svg>`;
+  return vscode.Uri.parse(`data:image/svg+xml;base64,${Buffer.from(svg, 'utf8').toString('base64')}`);
 }
 
 // ------------------------------------------------------------------ whiteboard
