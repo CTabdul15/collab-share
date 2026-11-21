@@ -1,0 +1,346 @@
+{
+ "format": "collab-share-whiteboard",
+ "version": 1,
+ "saved": "2026-11-21T12:00:00.000Z",
+ "shapes": [
+  {
+   "id": "readme",
+   "type": "note",
+   "x": -440,
+   "y": -400,
+   "w": 400,
+   "h": 250,
+   "text": "Pressure lockout: turn START on. The pump runs and the cylinder pushes out; at the end its rod reaches the limit sensor, which opens the 3/2 valve. The pressure fills slowly through the first throttle check valve (meter-in) into the gauge. When the gauge goes over 80 bar the lever is locked out: the pump stops, the cylinder returns and the second throttle check valve (meter-out) lets the gauge drain slowly to 0 bar. Turn START off to reset the lock. Turn the knobs to change the speeds.",
+   "color": "#ffd166",
+   "by": "Collab Share example",
+   "t": 1,
+   "z": 2
+  },
+  {
+   "id": "start",
+   "type": "node",
+   "kind": "LEVER",
+   "x": -420,
+   "y": 20,
+   "by": "Collab Share example",
+   "t": 2,
+   "z": 3,
+   "value": false
+  },
+  {
+   "id": "notStart",
+   "type": "node",
+   "kind": "NOT",
+   "x": -420,
+   "y": 150,
+   "by": "Collab Share example",
+   "t": 3,
+   "z": 4
+  },
+  {
+   "id": "lock",
+   "type": "node",
+   "kind": "SR",
+   "x": -280,
+   "y": 110,
+   "by": "Collab Share example",
+   "t": 4,
+   "z": 5
+  },
+  {
+   "id": "enable",
+   "type": "node",
+   "kind": "AND",
+   "x": -60,
+   "y": 40,
+   "by": "Collab Share example",
+   "t": 5,
+   "z": 6
+  },
+  {
+   "id": "locked",
+   "type": "node",
+   "kind": "LAMP",
+   "x": -60,
+   "y": 170,
+   "by": "Collab Share example",
+   "t": 6,
+   "z": 7,
+   "color": "#ff3131"
+  },
+  {
+   "id": "pump",
+   "type": "node",
+   "kind": "PUMP",
+   "x": 60,
+   "y": 10,
+   "by": "Collab Share example",
+   "t": 7,
+   "z": 8,
+   "value": 100
+  },
+  {
+   "id": "cyl",
+   "type": "node",
+   "kind": "CYLINDER",
+   "x": 300,
+   "y": -170,
+   "by": "Collab Share example",
+   "t": 8,
+   "z": 9,
+   "bore": 40,
+   "load": 1
+  },
+  {
+   "id": "ls",
+   "type": "node",
+   "kind": "LIMIT",
+   "x": 672,
+   "y": -168,
+   "by": "Collab Share example",
+   "t": 9,
+   "z": 10
+  },
+  {
+   "id": "v32",
+   "type": "node",
+   "kind": "VALVE_3_2",
+   "x": 380,
+   "y": 130,
+   "by": "Collab Share example",
+   "t": 10,
+   "z": 11
+  },
+  {
+   "id": "fill",
+   "type": "node",
+   "kind": "FLOW_1W",
+   "x": 700,
+   "y": 60,
+   "by": "Collab Share example",
+   "t": 11,
+   "z": 12,
+   "value": 40,
+   "mode": "in"
+  },
+  {
+   "id": "drain",
+   "type": "node",
+   "kind": "FLOW_1W",
+   "x": 890,
+   "y": 60,
+   "by": "Collab Share example",
+   "t": 12,
+   "z": 13,
+   "value": 12,
+   "mode": "out"
+  },
+  {
+   "id": "gauge",
+   "type": "node",
+   "kind": "GAUGE",
+   "x": 1080,
+   "y": 30,
+   "by": "Collab Share example",
+   "t": 13,
+   "z": 14,
+   "value": 80,
+   "range": 100
+  },
+  {
+   "id": "w-start.0-enable.0",
+   "type": "wire",
+   "a": {
+    "n": "start",
+    "p": 0
+   },
+   "b": {
+    "n": "enable",
+    "p": 0
+   },
+   "by": "Collab Share example",
+   "t": 14,
+   "z": 0
+  },
+  {
+   "id": "w-lock.1-enable.1",
+   "type": "wire",
+   "a": {
+    "n": "lock",
+    "p": 1
+   },
+   "b": {
+    "n": "enable",
+    "p": 1
+   },
+   "by": "Collab Share example",
+   "t": 15,
+   "z": 0
+  },
+  {
+   "id": "w-start.0-notStart.0",
+   "type": "wire",
+   "a": {
+    "n": "start",
+    "p": 0
+   },
+   "b": {
+    "n": "notStart",
+    "p": 0
+   },
+   "by": "Collab Share example",
+   "t": 16,
+   "z": 0
+  },
+  {
+   "id": "w-notStart.0-lock.1",
+   "type": "wire",
+   "a": {
+    "n": "notStart",
+    "p": 0
+   },
+   "b": {
+    "n": "lock",
+    "p": 1
+   },
+   "by": "Collab Share example",
+   "t": 17,
+   "z": 0
+  },
+  {
+   "id": "w-gauge.0-lock.0",
+   "type": "wire",
+   "a": {
+    "n": "gauge",
+    "p": 0
+   },
+   "b": {
+    "n": "lock",
+    "p": 0
+   },
+   "by": "Collab Share example",
+   "t": 18,
+   "z": 0
+  },
+  {
+   "id": "w-lock.0-locked.0",
+   "type": "wire",
+   "a": {
+    "n": "lock",
+    "p": 0
+   },
+   "b": {
+    "n": "locked",
+    "p": 0
+   },
+   "by": "Collab Share example",
+   "t": 19,
+   "z": 0
+  },
+  {
+   "id": "w-enable.0-pump.0",
+   "type": "wire",
+   "a": {
+    "n": "enable",
+    "p": 0
+   },
+   "b": {
+    "n": "pump",
+    "p": 0
+   },
+   "by": "Collab Share example",
+   "t": 20,
+   "z": 0
+  },
+  {
+   "id": "w-pump.0-cyl.0",
+   "type": "wire",
+   "a": {
+    "n": "pump",
+    "p": 0
+   },
+   "b": {
+    "n": "cyl",
+    "p": 0
+   },
+   "by": "Collab Share example",
+   "t": 21,
+   "z": 0
+  },
+  {
+   "id": "w-pump.0-v32.0",
+   "type": "wire",
+   "a": {
+    "n": "pump",
+    "p": 0
+   },
+   "b": {
+    "n": "v32",
+    "p": 0
+   },
+   "by": "Collab Share example",
+   "t": 22,
+   "z": 0
+  },
+  {
+   "id": "w-ls.0-v32.1",
+   "type": "wire",
+   "a": {
+    "n": "ls",
+    "p": 0
+   },
+   "b": {
+    "n": "v32",
+    "p": 1
+   },
+   "by": "Collab Share example",
+   "t": 23,
+   "z": 0
+  },
+  {
+   "id": "w-v32.0-fill.0",
+   "type": "wire",
+   "a": {
+    "n": "v32",
+    "p": 0
+   },
+   "b": {
+    "n": "fill",
+    "p": 0
+   },
+   "by": "Collab Share example",
+   "t": 24,
+   "z": 0
+  },
+  {
+   "id": "w-fill.0-drain.0",
+   "type": "wire",
+   "a": {
+    "n": "fill",
+    "p": 0
+   },
+   "b": {
+    "n": "drain",
+    "p": 0
+   },
+   "by": "Collab Share example",
+   "t": 25,
+   "z": 0
+  },
+  {
+   "id": "w-drain.0-gauge.0",
+   "type": "wire",
+   "a": {
+    "n": "drain",
+    "p": 0
+   },
+   "b": {
+    "n": "gauge",
+    "p": 0
+   },
+   "by": "Collab Share example",
+   "t": 26,
+   "z": 0
+  }
+ ]
+}

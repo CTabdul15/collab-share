@@ -79,10 +79,10 @@ async function openWhiteboard(): Promise<void> {
     } else if (guest) {
       WhiteboardPanel.show(await guest.boardConnection(), extCtx.extensionUri);
     } else {
-      void vscode.window.showInformationMessage("Start or join a Collab session to use the shared whiteboard.");
+      void vscode.window.showInformationMessage("Start or join a Collab session to use the shared Sandbox.");
     }
   } catch (e: any) {
-    void vscode.window.showErrorMessage(`Could not open the whiteboard: ${e?.message ?? e}`);
+    void vscode.window.showErrorMessage(`Could not open the Sandbox: ${e?.message ?? e}`);
   }
 }
 
@@ -90,7 +90,7 @@ const boardOffered = new Set<string>();
 function offerBoard(name: string): void {
   if (boardOffered.has(name)) return;
   boardOffered.add(name);
-  void vscode.window.showInformationMessage(`${name} opened the whiteboard.`, "Open Whiteboard").then((pick) => pick && openWhiteboard());
+  void vscode.window.showInformationMessage(`${name} opened the Sandbox.`, "Open Sandbox").then((pick) => pick && openWhiteboard());
 }
 
 /** Runs fn with a participant id from a tree element ("peer:3") or a number. */

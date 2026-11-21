@@ -1,8 +1,8 @@
 {
   "name": "collab-share",
   "displayName": "Collab Share",
-  "description": "Free Live Share alternative: code together in real time with friends anywhere. Shared editing, cursors, IntelliSense from the host, and a blueprint whiteboard with a live logic simulator.",
-  "version": "1.0.2",
+  "description": "Free Live Share alternative: code together in real time with friends anywhere. Shared editing, cursors, IntelliSense from the host, and a blueprint Sandbox with a live logic and fluid power simulator.",
+  "version": "1.1.3",
   "publisher": "CTabdul15",
   "icon": "resources/icon.png",
   "galleryBanner": {
@@ -145,7 +145,7 @@
       },
       {
         "command": "collab.whiteboard",
-        "title": "Open Whiteboard",
+        "title": "Open Sandbox",
         "category": "Collab",
         "icon": "$(symbol-color)"
       },
@@ -382,6 +382,11 @@
           "type": "string",
           "default": "",
           "description": "When hosting through a tunnel (cloudflared, ngrok, VS Code port forwarding), the public URL that forwards to your port, e.g. https://abc.trycloudflare.com. Used to build the invite link."
+        },
+        "collab.performanceOverlay": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show a small performance panel in the top-left corner of the Sandbox: CPU and RAM of VS Code's extension host (where this extension runs) and of the whole device, plus GPU load when the system reports it."
         }
       }
     },

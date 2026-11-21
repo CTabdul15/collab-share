@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import * as Y from 'yjs';
 import { randomBytes } from 'crypto';
 import { parseBoard, prepareForAdd, serializeBoard } from './boardFile';
+import { PerfSampler } from './perf';
 
 /** What the whiteboard panel needs from a host or guest session. */
 export interface BoardConnection {
@@ -25,6 +26,7 @@ export class WhiteboardPanel {
   private static current: WhiteboardPanel | undefined;
   private readonly subs: vscode.Disposable[] = [];
   private shapes: Y.Map<any>;
+  private readonly perf: PerfSampler;
 
   static show(conn: BoardConnection, extensionUri: vscode.Uri): void {
     if (WhiteboardPanel.current?.conn === conn) {
@@ -44,15 +46,17 @@ export class WhiteboardPanel {
 
   private constructor(
     private readonly conn: BoardConnection,
-    extensionUri: vscode.Uri,
+    private readonly extensionUri: vscode.Uri,
   ) {
     this.shapes = conn.doc.getMap('shapes');
-    this.panel = vscode.window.createWebviewPanel('collab.whiteboard', 'Blueprint Whiteboard', vscode.ViewColumn.Active, {
+    this.panel = vscode.window.createWebviewPanel('collab.whiteboard', 'Sandbox', vscode.ViewColumn.Active, {
       enableScripts: true,
       retainContextWhenHidden: true,
       localResourceRoots: [vscode.Uri.joinPath(extensionUri, 'media')],
     });
     this.panel.webview.html = html(this.panel.webview, extensionUri);
+    this.perf = new PerfSampler((s) => this.post({ type: 'perf', perf: s }));
+    if (vscode.workspace.getConfiguration('collab').get<boolean>('performanceOverlay', true)) this.perf.start();
 
     const observer = () => this.post({ type: 'shapes', shapes: [...this.shapes.values()] });
     this.shapes.observe(observer);
@@ -68,6 +72,13 @@ export class WhiteboardPanel {
       conn.onReadOnlyChange((ro) => this.post({ type: 'readOnly', value: ro })),
       conn.onSim((sim) => this.post({ type: 'sim', sim })),
       this.panel.webview.onDidReceiveMessage((m) => this.onMessage(m)),
+      vscode.workspace.onDidChangeConfiguration((e) => {
+        if (!e.affectsConfiguration('collab.performanceOverlay')) return;
+        const on = vscode.workspace.getConfiguration('collab').get<boolean>('performanceOverlay', true);
+        this.post({ type: 'perfEnabled', on });
+        if (on) this.perf.start(); else this.perf.stop();
+      }),
+      new vscode.Disposable(() => this.perf.stop()),
       this.panel.onDidDispose(() => {
         for (const s of this.subs) s.dispose();
         if (WhiteboardPanel.current === this) WhiteboardPanel.current = undefined;
@@ -80,24 +91,24 @@ export class WhiteboardPanel {
     type Item = vscode.QuickPickItem & { id: 'board' | 'png' };
     const pick = await vscode.window.showQuickPick<Item>(
       [
-        { id: 'board', label: '$(save) Whiteboard file (.board.json)', detail: 'Everything on the board, including circuits. Open it again later with "Open".' },
+        { id: 'board', label: '$(save) Sandbox file (.board.json)', detail: 'Everything on the board, including circuits. Open it again later with "Open".' },
         { id: 'png', label: '$(file-media) Picture (.png)', detail: 'An image of the drawing, for sharing.' },
       ],
-      { placeHolder: 'Save the whiteboard as…' },
+      { placeHolder: 'Save the Sandbox as…' },
     );
     if (!pick) return;
     const stamp = new Date().toISOString().slice(0, 10);
     if (pick.id === 'png') {
       if (!png) return;
-      const target = await vscode.window.showSaveDialog({ defaultUri: vscode.Uri.file(`whiteboard-${stamp}.png`), filters: { 'PNG image': ['png'] } });
+      const target = await vscode.window.showSaveDialog({ defaultUri: vscode.Uri.file(`sandbox-${stamp}.png`), filters: { 'PNG image': ['png'] } });
       if (!target) return;
       await vscode.workspace.fs.writeFile(target, Buffer.from(png.replace(/^data:image\/png;base64,/, ''), 'base64'));
       void vscode.window.setStatusBarMessage(`Saved ${target.fsPath}`, 4000);
       return;
     }
     const target = await vscode.window.showSaveDialog({
-      defaultUri: vscode.Uri.file(`whiteboard-${stamp}.board.json`),
-      filters: { 'Collab whiteboard': ['json'] },
+      defaultUri: vscode.Uri.file(`sandbox-${stamp}.board.json`),
+      filters: { 'Collab Sandbox': ['json'] },
     });
     if (!target) return;
     await vscode.workspace.fs.writeFile(target, Buffer.from(serializeBoard([...this.shapes.values()]), 'utf8'));
@@ -107,16 +118,34 @@ export class WhiteboardPanel {
   /** Opens a saved whiteboard file: replace the board, or add it to what's there. */
   private async open(): Promise<void> {
     if (this.conn.readOnly()) {
-      void vscode.window.showInformationMessage('You are read-only in this session, so you can\'t open a whiteboard file here.');
+      void vscode.window.showInformationMessage('You are read-only in this session, so you can\'t open a Sandbox file here.');
       return;
     }
-    const files = await vscode.window.showOpenDialog({ canSelectMany: false, filters: { 'Collab whiteboard': ['json'] }, title: 'Open a whiteboard file' });
+    type Source = vscode.QuickPickItem & { file?: string };
+    const source = await vscode.window.showQuickPick<Source>(
+      [
+        { label: '$(folder-opened) Open a Sandbox file…', detail: 'A .board.json file you saved before.' },
+        { label: 'Examples', kind: vscode.QuickPickItemKind.Separator },
+        { label: '$(beaker) Fluid power: press sequence', detail: 'Pushbuttons, OR/AND, 5/2 valve, double-acting cylinder, limit switch, delay, pump.', file: 'press-sequence.board.json' },
+        { label: '$(lock) Pressure lockout', detail: 'Lever → pump → cylinder → limit sensor → 3/2 valve → two throttle check valves → gauge; over 80 bar locks the lever out and the gauge drains slowly.', file: 'pressure-lockout.board.json' },
+        { label: '$(gear) Hydraulic jog: 4/3 valve', detail: 'Hold Extend / Retract; the cylinder stops and holds when you let go. Speed knob, gauge, end lamps.', file: 'hydraulic-jog.board.json' },
+        { label: '$(circle-large-filled) Traffic light', detail: 'Clock + counter + compare modules switch red, red/yellow, green and yellow.', file: 'traffic-light.board.json' },
+        { label: '$(symbol-number) Counter with 7-segment display', detail: 'Push buttons count up and down; reset; a lamp at the maximum.', file: 'counter-7seg.board.json' },
+        { label: '$(unmute) Drum machine', detail: 'An 8-step beat with kick, snare, hi-hat, clap and 808. Turn on Sound and flip Play.', file: 'drum-machine.board.json' },
+        { label: '$(lightbulb) Running light', detail: 'A light that travels across 8 lamps (D flip-flop ring counter).', file: 'running-light.board.json' },
+      ],
+      { placeHolder: 'Open a Sandbox' },
+    );
+    if (!source) return;
+    let files: vscode.Uri[] | undefined;
+    if (source.file) files = [vscode.Uri.joinPath(this.extensionUri, 'examples', source.file)];
+    else files = await vscode.window.showOpenDialog({ canSelectMany: false, filters: { 'Collab Sandbox': ['json'] }, title: 'Open a Sandbox file' });
     if (!files?.[0]) return;
     let shapes: any[];
     try {
       shapes = parseBoard(Buffer.from(await vscode.workspace.fs.readFile(files[0])).toString('utf8'));
     } catch {
-      void vscode.window.showErrorMessage('That file is not a Collab Share whiteboard.');
+      void vscode.window.showErrorMessage('That file is not a Collab Share Sandbox file.');
       return;
     }
     let mode: 'replace' | 'add' = 'replace';
@@ -148,7 +177,7 @@ export class WhiteboardPanel {
   private async onMessage(m: any): Promise<void> {
     switch (m?.type) {
       case 'ready':
-        this.post({ type: 'init', me: this.conn.me, readOnly: this.conn.readOnly(), shapes: [...this.shapes.values()] });
+        this.post({ type: 'init', me: this.conn.me, isHost: this.conn.me.id === 0, readOnly: this.conn.readOnly(), shapes: [...this.shapes.values()], perf: vscode.workspace.getConfiguration('collab').get<boolean>('performanceOverlay', true) });
         if (this.conn.lastSim()) this.post({ type: 'sim', sim: this.conn.lastSim() });
         return;
       case 'pointer':
@@ -167,7 +196,11 @@ export class WhiteboardPanel {
     const del = Array.isArray(m.del) ? m.del : [];
     this.conn.doc.transact(() => {
       for (const id of del) this.shapes.delete(String(id));
-      for (const shape of set) if (shape && typeof shape.id === 'string') this.shapes.set(shape.id, shape);
+      for (const shape of set) {
+        if (!shape || typeof shape.id !== 'string') continue;
+        if (shape.type === 'meta' && this.conn.me.id !== 0) continue; // board settings: host only
+        this.shapes.set(shape.id, shape);
+      }
     }, 'local');
   }
 }
@@ -186,7 +219,9 @@ const ICONS = {
   dim: svg('<path d="M2 5v6M14 5v6M2 8h12"/><path d="M4.5 6.5L2.5 8l2 1.5M11.5 6.5l2 1.5-2 1.5"/>'),
   text: svg('<path d="M3 4V3h10v1M8 3v10M6 13h4"/>'),
   note: svg('<path d="M3 2.5h10v7.5l-3.5 3.5H3z"/><path d="M13 10H9.5v3.5"/>'),
+  bucket: svg('<path d="M7 2.5l5.5 5.5-5 5L2 7.5z"/><path d="M2.2 7.5h10"/><path d="M13.4 9.5c1 1.5 1.5 2.3 1.5 3a1.5 1.5 0 01-3 0c0-.7.5-1.5 1.5-3z"/>'),
   eraser: svg('<path d="M6 13h7"/><path d="M2.8 9.8l6-6a1.4 1.4 0 012 0l2.4 2.4a1.4 1.4 0 010 2L8.5 12.9H5.9z"/><path d="M6.3 6.3l3.4 3.4"/>'),
+  help: svg('<circle cx="8" cy="8" r="6"/><path d="M6.3 6.2a1.8 1.8 0 013.5.5c0 1.2-1.8 1.5-1.8 2.6"/><circle cx="8" cy="11.6" r=".4" fill="currentColor"/>'),
   nodes: svg('<rect x="1.5" y="3" width="5" height="4" rx="1"/><rect x="9.5" y="9" width="5" height="4" rx="1"/><path d="M6.5 5c3 0 0 6 3 6"/>'),
   dash: svg('<path d="M2 8h2.5M6.75 8h2.5M11.5 8H14"/>'),
   fill: svg('<rect x="2.5" y="3.5" width="11" height="9" rx="1" fill="currentColor" fill-opacity=".35"/>'),
@@ -209,12 +244,8 @@ const ICONS = {
 const width = (n: number, w: number) =>
   `<button data-width="${n}" title="Line width ${n}"><svg viewBox="0 0 16 16" width="16" height="16"><path d="M2.5 8h11" stroke="currentColor" stroke-width="${w}" stroke-linecap="round"/></svg></button>`;
 const tool = (t: keyof typeof ICONS, title: string) => `<button data-tool="${t}" title="${title}">${ICONS[t]}</button>`;
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const KINDS = require('../media/circuit.js').KINDS;
-const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
-const nodeBtn = (k: string, label: string) => `<button data-node="${k}" title="${esc(KINDS[k]?.help ?? KINDS[k]?.title ?? label)}">${label}</button>`;
 
-function html(webview: vscode.Webview, extensionUri: vscode.Uri): string {
+export function html(webview: vscode.Webview, extensionUri: vscode.Uri): string {
   const nonce = randomBytes(16).toString('base64');
   const media = (f: string) => webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, 'media', f));
   return /* html */ `<!DOCTYPE html>
@@ -224,47 +255,58 @@ function html(webview: vscode.Webview, extensionUri: vscode.Uri): string {
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource} 'unsafe-inline'; script-src 'nonce-${nonce}'; img-src data:;">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="${media('whiteboard.css')}">
-<title>Blueprint Whiteboard</title>
+<title>Sandbox</title>
 </head>
 <body>
 <canvas id="c" tabindex="0"></canvas>
+<div id="perf" title="Performance: VS Code extension host (this extension runs in it) and the whole device. Turn off with the setting collab.performanceOverlay."></div>
 <div id="bar" class="bar">
   ${tool('select', 'Select, move, resize (V)')}
   ${tool('hand', 'Pan (H, or hold Space / right mouse)')}
   <span class="sep"></span>
   ${tool('pen', 'Pen (P)')}
-  ${tool('line', 'Line (L)')}
-  ${tool('arrow', 'Arrow (A)')}
-  ${tool('rect', 'Rectangle (R)')}
-  ${tool('ellipse', 'Ellipse (O)')}
-  ${tool('diamond', 'Diamond / decision (I)')}
-  ${tool('dim', 'Dimension line with length (D)')}
+  <span class="popwrap"><button id="shapebtn" data-pop="shapes" title="Shapes: line, arrow, rectangle, ellipse, diamond, dimension">${ICONS.rect}<span class="caret">▾</span></button>
+    <div class="pop" id="pop-shapes">
+      ${tool('line', 'Line (L)')}${tool('arrow', 'Arrow (A)')}${tool('rect', 'Rectangle (R)')}${tool('ellipse', 'Ellipse (O)')}${tool('diamond', 'Diamond / decision (I)')}${tool('dim', 'Dimension line with length (D)')}
+    </div></span>
   ${tool('text', 'Text (T)')}
   ${tool('note', 'Sticky note (N)')}
+  ${tool('bucket', 'Fill bucket (B): click inside a shape to fill it with the current color. Shift+click removes the fill.')}
   ${tool('eraser', 'Eraser (E)')}
-  <button data-tool="nodes" title="Blueprint nodes: logic gates, Clamp, math… (G)">${ICONS.nodes}<span>Nodes</span></button>
   <span class="sep"></span>
-  <button class="sw" data-color="#ffffff" style="background:#ffffff" title="White"></button>
-  <button class="sw" data-color="#7fdbff" style="background:#7fdbff" title="Cyan"></button>
-  <button class="sw" data-color="#ffd166" style="background:#ffd166" title="Yellow"></button>
-  <button class="sw" data-color="#ff6b6b" style="background:#ff6b6b" title="Red"></button>
-  <button class="sw" data-color="#8affc1" style="background:#8affc1" title="Green"></button>
-  <button class="sw" data-color="#c792ea" style="background:#c792ea" title="Purple"></button>
-  <input id="custom" type="color" value="#ffffff" title="Any color">
+  <button data-tool="nodes" title="Inventory: every part you can place (G)">${ICONS.nodes}<span>Inventory</span></button>
+  <button id="help" title="Help: what every part does (F1)">${ICONS.help}</button>
   <span class="sep"></span>
-  ${width(2, 1.2)}${width(4, 2.4)}${width(8, 4.2)}
-  <button id="dash" title="Dashed lines">${ICONS.dash}</button>
-  <button id="fill" title="Fill shapes">${ICONS.fill}</button>
+  <span class="popwrap"><button id="colorbtn" data-pop="colors" title="Color"><span class="cdot"></span><span class="caret">▾</span></button>
+    <div class="pop" id="pop-colors">
+      <button class="sw" data-color="#ffffff" style="background:#ffffff" title="White"></button>
+      <button class="sw" data-color="#22c55e" style="background:#22c55e" title="Green"></button>
+      <button class="sw" data-color="#ef4444" style="background:#ef4444" title="Red"></button>
+      <button class="sw" data-color="#3b82f6" style="background:#3b82f6" title="Blue"></button>
+      <button class="sw" data-color="#facc15" style="background:#facc15" title="Yellow"></button>
+      <button class="sw" data-color="#f97316" style="background:#f97316" title="Orange"></button>
+      <input id="custom" type="color" value="#ffffff" title="Any color">
+    </div></span>
+  <span class="popwrap"><button id="stylebtn" data-pop="style" title="Line width, dashes, fill, wire style">${ICONS.dash}<span class="caret">▾</span></button>
+    <div class="pop" id="pop-style">
+      ${width(2, 1.2)}${width(4, 2.4)}${width(8, 4.2)}
+      <button id="dash" title="Dashed lines">${ICONS.dash}</button>
+      <button id="fill" title="Fill shapes">${ICONS.fill}</button>
+      <button id="wirestyle" title="Square wires & arrows (otherwise curved)">${ICONS.elbow}</button>
+    </div></span>
   <button id="snap" title="Snap to grid (S)">${ICONS.snap}</button>
-  <button id="wirestyle" title="Square wires & arrows">${ICONS.elbow}</button>
-  <button id="sound" title="Click to turn on sound">${ICONS.sound}<span>Sound</span></button>
+  <button id="sound" title="Sound on/off">${ICONS.sound}</button>
   <span class="sep"></span>
   <button id="undo" title="Undo (Ctrl+Z)">${ICONS.undo}</button>
   <button id="redo" title="Redo (Ctrl+Y)">${ICONS.redo}</button>
-  <button id="fit" title="Fit drawing to screen">${ICONS.fit}</button>
-  <button id="export" title="Save / download the whiteboard (board file or PNG image)">${ICONS.export}</button>
-  <button id="open" title="Open / import a saved whiteboard file">${ICONS.open}</button>
-  <button id="clear" title="Clear the whole board">${ICONS.clear}<span>Clear</span></button>
+  <span class="popwrap"><button id="morebtn" data-pop="more" title="More: fit, save, open, clear, background">⋯</button>
+    <div class="pop pop-col" id="pop-more">
+      <button id="fit" title="Fit drawing to screen">${ICONS.fit}<span>Fit to screen</span></button>
+      <button id="export" title="Save / download the Sandbox (board file or PNG image)">${ICONS.export}<span>Save / export</span></button>
+      <button id="open" title="Open an example or a saved Sandbox file">${ICONS.open}<span>Open / examples</span></button>
+      <button id="clear" title="Clear the whole board">${ICONS.clear}<span>Clear</span></button>
+      <div id="bgpick" title="Background for everyone (host only)"><span class="poplabel">Background</span><button class="bgsw" data-bg="blue" title="Blueprint blue"></button><button class="bgsw" data-bg="black" title="Black"></button><button class="bgsw" data-bg="gray" title="Gray"></button><button class="bgsw" data-bg="green" title="Green"></button><input id="bgcustom" type="color" value="#123f7a" title="Custom background color"></div>
+    </div></span>
 </div>
 <div id="selbar" class="bar">
   <span id="selcount" style="font-size:12px;padding:0 6px;opacity:.85"></span>
@@ -275,45 +317,19 @@ function html(webview: vscode.Webview, extensionUri: vscode.Uri): string {
   <button id="rotr" title="Rotate right 90° (Shift+R) — or drag the round handle above the shape">${ICONS.rotr}</button>
   <button id="del" title="Delete (Del)">${ICONS.del}<span>Delete</span></button>
 </div>
-<div id="nodes">
-  <div><h4>Logic gates</h4><div class="grid">
-    ${nodeBtn('AND', 'AND')}${nodeBtn('OR', 'OR')}${nodeBtn('NOT', 'NOT')}${nodeBtn('XOR', 'XOR')}
-    ${nodeBtn('NAND', 'NAND')}${nodeBtn('NOR', 'NOR')}${nodeBtn('XNOR', 'XNOR')}${nodeBtn('BUF', 'Buffer')}
-    ${nodeBtn('AND3', 'AND (3 in)')}${nodeBtn('OR3', 'OR (3 in)')}
-  </div></div>
-  <div><h4>Memory</h4><div class="grid one">
-    ${nodeBtn('DFF', '⧉ D Flip-Flop')}${nodeBtn('TFF', '⧉ T Flip-Flop')}${nodeBtn('JKFF', '⧉ JK Flip-Flop')}
-    ${nodeBtn('SR', '⧉ SR Latch')}${nodeBtn('DLATCH', '⧉ D Latch')}${nodeBtn('COUNTER', '⧉ Counter')}
-  </div></div>
-  <div><h4>Timing</h4><div class="grid one">
-    ${nodeBtn('CLOCK', '⏱ Clock')}${nodeBtn('DELAY', '⏱ Delay')}${nodeBtn('PULSE', '⏱ Pulse')}
-  </div></div>
-  <div><h4>Inputs</h4><div class="grid one">
-    ${nodeBtn('BUTTON', 'Push Button')}${nodeBtn('LEVER', 'Lever')}${nodeBtn('SWITCH', 'Switch')}${nodeBtn('NUMBER', 'Number')}
-  </div></div>
-  <div><h4>Outputs</h4><div class="grid one">
-    ${nodeBtn('LAMP', 'Lamp')}${nodeBtn('MOTOR', 'Electric Motor')}${nodeBtn('SEG7', '7-Segment')}${nodeBtn('DISPLAY', 'Display')}
-  </div></div>
-  <div><h4>Sound</h4><div class="grid one">
-    ${nodeBtn('NOTE', '♪ Note Block')}${nodeBtn('DRUMKIT', '🥁 Drum Kit')}${nodeBtn('BUZZER', '🔊 Buzzer')}
-  </div></div>
-  <div><h4>Math</h4><div class="grid">
-    ${nodeBtn('CLAMP', 'ƒ Clamp')}${nodeBtn('LERP', 'ƒ Lerp')}${nodeBtn('ADD', 'ƒ Add')}${nodeBtn('SUB', 'ƒ Subtract')}
-    ${nodeBtn('MUL', 'ƒ Multiply')}${nodeBtn('DIV', 'ƒ Divide')}${nodeBtn('MOD', 'ƒ Modulo')}${nodeBtn('ABS', 'ƒ Abs')}
-    ${nodeBtn('MIN', 'ƒ Min')}${nodeBtn('MAX', 'ƒ Max')}${nodeBtn('SELECT', 'ƒ Select')}${nodeBtn('GT', 'A > B')}
-    ${nodeBtn('LT', 'A < B')}${nodeBtn('EQ', 'A = B')}
-  </div></div>
-</div>
+<div id="nodes"></div>
+<div id="helpbox"></div>
 <div id="ro">View only — the host made you read-only</div>
 <textarea id="edit" spellcheck="false"></textarea>
 <div id="props"></div>
 <div id="title">
-  <div>Collab Share · Blueprint</div>
+  <div>Collab Share · Sandbox</div>
   <div><span>Drawn by</span><span id="authors">—</span></div>
   <div><span>Zoom <span id="scale">100%</span></span><span>Sheet 01</span></div>
 </div>
-<div id="hint">Drag from a node's pin to another pin to wire it · hold a Push Button, click a Lever or Switch · double-click a module to change its setting (clock speed, delay, pitch…) · double-click text, notes or numbers to edit · drag the round handle to rotate · scroll to zoom, right-drag to pan</div>
+<div id="hint">Drag from a node's pin to another pin to wire it · hold a Push Button, click a Lever or Switch · click the ⚙ gear on a module to change its settings (clock speed, delay, pitch…) · double-click text or notes to edit · drag the round handle to rotate · scroll to zoom, right-drag to pan</div>
 <script nonce="${nonce}" src="${media('circuit.js')}"></script>
+<script nonce="${nonce}" src="${media('catalog.js')}"></script>
 <script nonce="${nonce}" src="${media('whiteboard.js')}"></script>
 </body>
 </html>`;

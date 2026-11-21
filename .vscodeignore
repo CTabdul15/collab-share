@@ -16,5 +16,12 @@ src/**
 test/**
 tsconfig.json
 *.board.json
-!examples/*.board.json
+**/*.board.json
+!examples/running-light.board.json
+!examples/press-sequence.board.json
+!examples/hydraulic-jog.board.json
+!examples/traffic-light.board.json
+!examples/counter-7seg.board.json
+!examples/drum-machine.board.json
+!examples/pressure-lockout.board.json
 .gitignore

@@ -59,7 +59,7 @@ shapes.push({
   id: 'note', type: 'note', x: 0, y: 460, w: 280, h: 150, color: '#ffd166', by, t: t++, z: t,
   text: 'Running light: 8 D flip-flops share one clock. Each D takes the previous Q, so the light moves one lamp per tick. ' +
     'The first D = NOT(lamps 1-7): a new light enters when it reaches the end. Lever = run/pause. Button = reset. ' +
-    'Double-click the Clock to change the speed.',
+    'Click the gear on the Clock to change the speed.',
 });
 
 // ------------------------------------------------------------------ verify with the simulator

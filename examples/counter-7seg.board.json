@@ -1,0 +1,186 @@
+{
+ "format": "collab-share-whiteboard",
+ "version": 1,
+ "saved": "2026-11-21T12:00:00.000Z",
+ "shapes": [
+  {
+   "id": "readme",
+   "type": "note",
+   "x": -260,
+   "y": -190,
+   "w": 340,
+   "h": 150,
+   "text": "Counter: press COUNT to add one (hold DOWN to count down). RESET goes back to 0. The lamp lights at the maximum (9; click the counter’s gear to change it).",
+   "color": "#ffd166",
+   "by": "Collab Share example",
+   "t": 1,
+   "z": 2
+  },
+  {
+   "id": "btn",
+   "type": "node",
+   "kind": "BUTTON",
+   "x": -260,
+   "y": 0,
+   "by": "Collab Share example",
+   "t": 2,
+   "z": 3,
+   "value": false
+  },
+  {
+   "id": "down",
+   "type": "node",
+   "kind": "LEVER",
+   "x": -260,
+   "y": 90,
+   "by": "Collab Share example",
+   "t": 3,
+   "z": 4,
+   "value": false
+  },
+  {
+   "id": "reset",
+   "type": "node",
+   "kind": "BUTTON",
+   "x": -260,
+   "y": 180,
+   "by": "Collab Share example",
+   "t": 4,
+   "z": 5,
+   "value": false,
+   "color": "#4363d8"
+  },
+  {
+   "id": "count",
+   "type": "node",
+   "kind": "COUNTER",
+   "x": -60,
+   "y": 40,
+   "by": "Collab Share example",
+   "t": 5,
+   "z": 6,
+   "value": 9
+  },
+  {
+   "id": "seg",
+   "type": "node",
+   "kind": "SEG7",
+   "x": 160,
+   "y": -20,
+   "by": "Collab Share example",
+   "t": 6,
+   "z": 7
+  },
+  {
+   "id": "disp",
+   "type": "node",
+   "kind": "DISPLAY",
+   "x": 160,
+   "y": 110,
+   "by": "Collab Share example",
+   "t": 7,
+   "z": 8
+  },
+  {
+   "id": "max",
+   "type": "node",
+   "kind": "LAMP",
+   "x": 160,
+   "y": 200,
+   "by": "Collab Share example",
+   "t": 8,
+   "z": 9,
+   "color": "#3cb44b"
+  },
+  {
+   "id": "w-btn.0-count.0",
+   "type": "wire",
+   "a": {
+    "n": "btn",
+    "p": 0
+   },
+   "b": {
+    "n": "count",
+    "p": 0
+   },
+   "by": "Collab Share example",
+   "t": 9,
+   "z": 0
+  },
+  {
+   "id": "w-down.0-count.1",
+   "type": "wire",
+   "a": {
+    "n": "down",
+    "p": 0
+   },
+   "b": {
+    "n": "count",
+    "p": 1
+   },
+   "by": "Collab Share example",
+   "t": 10,
+   "z": 0
+  },
+  {
+   "id": "w-reset.0-count.2",
+   "type": "wire",
+   "a": {
+    "n": "reset",
+    "p": 0
+   },
+   "b": {
+    "n": "count",
+    "p": 2
+   },
+   "by": "Collab Share example",
+   "t": 11,
+   "z": 0
+  },
+  {
+   "id": "w-count.0-seg.0",
+   "type": "wire",
+   "a": {
+    "n": "count",
+    "p": 0
+   },
+   "b": {
+    "n": "seg",
+    "p": 0
+   },
+   "by": "Collab Share example",
+   "t": 12,
+   "z": 0
+  },
+  {
+   "id": "w-count.0-disp.0",
+   "type": "wire",
+   "a": {
+    "n": "count",
+    "p": 0
+   },
+   "b": {
+    "n": "disp",
+    "p": 0
+   },
+   "by": "Collab Share example",
+   "t": 13,
+   "z": 0
+  },
+  {
+   "id": "w-count.1-max.0",
+   "type": "wire",
+   "a": {
+    "n": "count",
+    "p": 1
+   },
+   "b": {
+    "n": "max",
+    "p": 0
+   },
+   "by": "Collab Share example",
+   "t": 14,
+   "z": 0
+  }
+ ]
+}

@@ -1,0 +1,373 @@
+{
+ "format": "collab-share-whiteboard",
+ "version": 1,
+ "saved": "2026-11-21T01:48:17.546Z",
+ "shapes": [
+  {
+   "id": "readme",
+   "type": "note",
+   "x": -300,
+   "y": -190,
+   "w": 360,
+   "h": 190,
+   "color": "#ffd166",
+   "by": "Collab Share example",
+   "t": 1,
+   "z": 2,
+   "text": "Fluid power demo: press START (or turn AUTO on). The 5/2 valve sends pressure to A, the cylinder extends and its rod presses the limit switch. 0.5 s later the valve switches back and the cylinder returns. Turn the THROTTLE CHECK VALVE knob to change the extend speed (it slows the air/oil coming out of B; the return stroke stays fast). Hold STOP (NC contact) to stop the pump. Click the gear on a part for its settings."
+  },
+  {
+   "id": "start",
+   "type": "node",
+   "kind": "BUTTON",
+   "x": -300,
+   "y": 210,
+   "by": "Collab Share example",
+   "t": 2,
+   "z": 3,
+   "value": false
+  },
+  {
+   "id": "auto",
+   "type": "node",
+   "kind": "LEVER",
+   "x": -300,
+   "y": 300,
+   "by": "Collab Share example",
+   "t": 3,
+   "z": 4,
+   "value": false
+  },
+  {
+   "id": "or",
+   "type": "node",
+   "kind": "OR",
+   "x": -160,
+   "y": 250,
+   "by": "Collab Share example",
+   "t": 4,
+   "z": 5
+  },
+  {
+   "id": "and",
+   "type": "node",
+   "kind": "AND",
+   "x": 0,
+   "y": 300,
+   "by": "Collab Share example",
+   "t": 5,
+   "z": 6
+  },
+  {
+   "id": "stop",
+   "type": "node",
+   "kind": "BUTTON",
+   "x": -300,
+   "y": 480,
+   "by": "Collab Share example",
+   "t": 6,
+   "z": 7,
+   "value": false,
+   "nc": true,
+   "color": "#e03131"
+  },
+  {
+   "id": "pump",
+   "type": "node",
+   "kind": "PUMP",
+   "x": -120,
+   "y": 470,
+   "by": "Collab Share example",
+   "t": 7,
+   "z": 8,
+   "value": 100
+  },
+  {
+   "id": "valve",
+   "type": "node",
+   "kind": "VALVE_5_2",
+   "x": 150,
+   "y": 330,
+   "by": "Collab Share example",
+   "t": 8,
+   "z": 9,
+   "mode": "bistable"
+  },
+  {
+   "id": "cyl",
+   "type": "node",
+   "kind": "CYL_DA",
+   "x": 200,
+   "y": 110,
+   "by": "Collab Share example",
+   "t": 9,
+   "z": 10,
+   "bore": 40,
+   "load": 1
+  },
+  {
+   "id": "speed",
+   "type": "node",
+   "kind": "FLOW_1W",
+   "x": 430,
+   "y": 225,
+   "by": "Collab Share example",
+   "t": 10,
+   "z": 11,
+   "value": 60,
+   "mode": "out"
+  },
+  {
+   "id": "gauge",
+   "type": "node",
+   "kind": "GAUGE",
+   "x": 470,
+   "y": 440,
+   "by": "Collab Share example",
+   "t": 11,
+   "z": 12,
+   "value": 50
+  },
+  {
+   "id": "ls",
+   "type": "node",
+   "kind": "LIMIT",
+   "x": 572,
+   "y": 112,
+   "by": "Collab Share example",
+   "t": 12,
+   "z": 13
+  },
+  {
+   "id": "delay",
+   "type": "node",
+   "kind": "DELAY",
+   "x": 740,
+   "y": 260,
+   "by": "Collab Share example",
+   "t": 13,
+   "z": 14,
+   "value": 0.5
+  },
+  {
+   "id": "lamp",
+   "type": "node",
+   "kind": "LAMP",
+   "x": 740,
+   "y": 80,
+   "by": "Collab Share example",
+   "t": 14,
+   "z": 15
+  },
+  {
+   "id": "w-start.0-or.0",
+   "type": "wire",
+   "a": {
+    "n": "start",
+    "p": 0
+   },
+   "b": {
+    "n": "or",
+    "p": 0
+   },
+   "by": "Collab Share example",
+   "t": 15,
+   "z": 0
+  },
+  {
+   "id": "w-auto.0-or.1",
+   "type": "wire",
+   "a": {
+    "n": "auto",
+    "p": 0
+   },
+   "b": {
+    "n": "or",
+    "p": 1
+   },
+   "by": "Collab Share example",
+   "t": 16,
+   "z": 0
+  },
+  {
+   "id": "w-or.0-and.0",
+   "type": "wire",
+   "a": {
+    "n": "or",
+    "p": 0
+   },
+   "b": {
+    "n": "and",
+    "p": 0
+   },
+   "by": "Collab Share example",
+   "t": 17,
+   "z": 0
+  },
+  {
+   "id": "w-cyl.2-and.1",
+   "type": "wire",
+   "a": {
+    "n": "cyl",
+    "p": 2
+   },
+   "b": {
+    "n": "and",
+    "p": 1
+   },
+   "by": "Collab Share example",
+   "t": 18,
+   "z": 0
+  },
+  {
+   "id": "w-and.0-valve.1",
+   "type": "wire",
+   "a": {
+    "n": "and",
+    "p": 0
+   },
+   "b": {
+    "n": "valve",
+    "p": 1
+   },
+   "by": "Collab Share example",
+   "t": 19,
+   "z": 0
+  },
+  {
+   "id": "w-stop.0-pump.0",
+   "type": "wire",
+   "a": {
+    "n": "stop",
+    "p": 0
+   },
+   "b": {
+    "n": "pump",
+    "p": 0
+   },
+   "by": "Collab Share example",
+   "t": 20,
+   "z": 0
+  },
+  {
+   "id": "w-pump.0-valve.0",
+   "type": "wire",
+   "a": {
+    "n": "pump",
+    "p": 0
+   },
+   "b": {
+    "n": "valve",
+    "p": 0
+   },
+   "by": "Collab Share example",
+   "t": 21,
+   "z": 0
+  },
+  {
+   "id": "w-valve.0-cyl.0",
+   "type": "wire",
+   "a": {
+    "n": "valve",
+    "p": 0
+   },
+   "b": {
+    "n": "cyl",
+    "p": 0
+   },
+   "by": "Collab Share example",
+   "t": 22,
+   "z": 0
+  },
+  {
+   "id": "w-valve.1-speed.0",
+   "type": "wire",
+   "a": {
+    "n": "valve",
+    "p": 1
+   },
+   "b": {
+    "n": "speed",
+    "p": 0
+   },
+   "by": "Collab Share example",
+   "t": 23,
+   "z": 0
+  },
+  {
+   "id": "w-speed.0-cyl.1",
+   "type": "wire",
+   "a": {
+    "n": "speed",
+    "p": 0
+   },
+   "b": {
+    "n": "cyl",
+    "p": 1
+   },
+   "by": "Collab Share example",
+   "t": 24,
+   "z": 0
+  },
+  {
+   "id": "w-valve.0-gauge.0",
+   "type": "wire",
+   "a": {
+    "n": "valve",
+    "p": 0
+   },
+   "b": {
+    "n": "gauge",
+    "p": 0
+   },
+   "by": "Collab Share example",
+   "t": 25,
+   "z": 0
+  },
+  {
+   "id": "w-ls.0-delay.0",
+   "type": "wire",
+   "a": {
+    "n": "ls",
+    "p": 0
+   },
+   "b": {
+    "n": "delay",
+    "p": 0
+   },
+   "by": "Collab Share example",
+   "t": 26,
+   "z": 0
+  },
+  {
+   "id": "w-ls.0-lamp.0",
+   "type": "wire",
+   "a": {
+    "n": "ls",
+    "p": 0
+   },
+   "b": {
+    "n": "lamp",
+    "p": 0
+   },
+   "by": "Collab Share example",
+   "t": 27,
+   "z": 0
+  },
+  {
+   "id": "w-delay.0-valve.2",
+   "type": "wire",
+   "a": {
+    "n": "delay",
+    "p": 0
+   },
+   "b": {
+    "n": "valve",
+    "p": 2
+   },
+   "by": "Collab Share example",
+   "t": 28,
+   "z": 0
+  }
+ ]
+}

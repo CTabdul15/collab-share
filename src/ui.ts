@@ -84,7 +84,7 @@ export class SessionTree implements vscode.TreeDataProvider<vscode.TreeItem> {
         );
       }
       items.push(item('Copy Invite Link', 'copy', { command: 'collab.copyInvite' }));
-      items.push(item('Whiteboard', 'symbol-color', { description: 'blueprint', command: 'collab.whiteboard' }));
+      items.push(item('Sandbox', 'symbol-color', { description: 'blueprint', command: 'collab.whiteboard' }));
     } else if (s.guest) {
       const g = s.guest;
       if (g.state === 'connected') {
@@ -94,7 +94,7 @@ export class SessionTree implements vscode.TreeDataProvider<vscode.TreeItem> {
             color: 'charts.green',
           }),
           item('Find File…', 'search', { description: 'Ctrl+Alt+P', command: 'collab.findFile' }),
-          item('Whiteboard', 'symbol-color', { description: 'blueprint', command: 'collab.whiteboard' }),
+          item('Sandbox', 'symbol-color', { description: 'blueprint', command: 'collab.whiteboard' }),
         );
       } else if (g.state === 'connecting') {
         items.push(item('Connecting…', 'sync~spin'));

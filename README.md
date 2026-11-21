@@ -26,9 +26,9 @@ Click a name to **jump** to them, or press 📌 to **follow** them around the pr
 ![The Collab Share sidebar for host and guest](images/sidebar.png)
 
 **Host:** invite link, Internet link status, **read-only / can edit** per person, **colors** per person, stop sharing.
-**Guest:** who is here and where, find files, whiteboard, leave.
+**Guest:** who is here and where, find files, Sandbox, leave.
 
-## A whiteboard with a real logic simulator
+## A Sandbox with a real logic simulator
 
 ![Running light built from D flip-flops](images/whiteboard-logic.png)
 
@@ -37,7 +37,7 @@ Wire up **logic gates, flip-flops (D, T, JK with Set/Reset), counters, clocks, d
 ![Drawing tools, sticky notes, motor, 7-segment, drums and piano](images/whiteboard-draw.png)
 
 **Draw:** shapes, arrows, dimension lines, sticky notes, rotation, square or curved wires.
-**Play:** motor, 7-segment display, drum kit, piano / 808 / phonk bell and more.
+**Play:** motor, valves and cylinders, 7-segment display, drum kit, piano / 808 / phonk bell and more.
 **Keep it:** save as a board file to open again later, or export a PNG.
 
 ## Also included
@@ -68,21 +68,27 @@ Say "Not now" to share on your local network only. Windows may ask to allow VS C
 ### Joining
 Run **Collab: Join Session** (or use the **Collab Share** icon in the left bar) and paste the link. A new window opens with the host's files. Use `Ctrl+Alt+P` to find files by name.
 
-### Whiteboard
-- **Tools:** select / move / resize, pen, line, arrow, rectangle, ellipse, diamond, dimension line, text, sticky note, eraser.
+### Sandbox
+- **Tools:** select / move / resize, pen, line, arrow, rectangle, ellipse, diamond, dimension line, text, sticky note, fill bucket (B), eraser.
 - **Style:** colors (including custom), line widths, dashed lines, fill, snap-to-grid.
-- **Editing:** box select or Shift+click; copy / cut / paste / duplicate (`Ctrl+C` / `X` / `V` / `D`); front / back (`]` / `[`); arrow keys to nudge; double-click to edit; undo / redo.
+- **Editing:** box select or Shift+click; copy / cut / paste / duplicate (`Ctrl+C` / `X` / `V` / `D`); front / back (`]` / `[`); arrow keys to nudge; double-click a note or text to edit it; undo / redo.
 - **Rotate:** drag the round handle (snaps to 15°, hold Shift for any angle), use ↺ / ↻, or press `Shift+R` / `Shift+L`.
-- **Nodes (`G`):**
+- **Inventory (`G`):**
   - logic gates (AND, OR, NOT, NAND, NOR, XOR, XNOR, Buffer, 3-input AND/OR);
   - memory (D / T / JK flip-flops with Set on top and Reset at the bottom, SR latch, D latch, Counter);
   - timing (Clock, Delay, Pulse);
-  - inputs (Push Button, Lever, Switch, Number);
+  - inputs (Push Button with NO/NC and momentary/latching, Lever, Switch, Limit Sensor, Speed Knob, Number);
   - outputs (Lamp, Motor, 7-Segment, Display);
+  - physics (Steel Block that rods push, slide or turn around a pivot; Bedrock that never moves);
   - sound (Note Block with 9 instruments, Drum Kit, Buzzer);
+  - fluid power, ISO style: pump, 3/2, 5/2, 4/3 and 2/2 valves, single- and double-acting cylinders, flow control and throttle check valve (speed knobs), limit sensors (triggered by the cylinder rod), pressure gauge;
   - math (Clamp, Lerp, Add, Subtract, Multiply, Divide, Modulo, Min, Max, Abs, Select, >, <, =).
-- **Wires:** drag from pin to pin. Red = on, black = off, gray = not connected. Double-click a module to change its setting.
-- **Sound:** turn it on with the **Sound** button. Double-click a Note Block or Buzzer to pick the instrument or wave, then press **▶ Test sound**.
+- **Wires:** drag from pin to pin. Red = on, black = off, gray = not connected; hydraulic lines are blue. Point at a pin to see what it is. Click the ⚙ gear on a module to change its settings.
+- **Help (F1):** explains every part in the inventory.
+- **Background:** the host picks blue, black, gray or green for everyone.
+- **Examples:** the Open button includes a fluid power press, a pressure lockout, a hydraulic jog with a 4/3 valve, a traffic light, a counter with a 7-segment display, a drum machine and a running light.
+- **Settings:** click the gear on a module to change its settings.
+- **Sound:** turn it on with the **Sound** button. Click the gear on a Note Block or Buzzer to pick the instrument or wave, then press **▶ Test sound**.
 
 ### Settings
 | Setting | Default | Description |

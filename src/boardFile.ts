@@ -27,6 +27,7 @@ export function prepareForAdd(existing: any[], shapes: any[], newId: () => strin
   const left = Math.min(Infinity, ...shapes.flatMap(xsOf));
   const dx = Number.isFinite(right) && Number.isFinite(left) ? right + 160 - left : 0;
   return shapes
+    .filter((x) => x.type !== 'meta') // board settings stay with the board you add to
     .map((x) => {
       const c = JSON.parse(JSON.stringify(x));
       c.id = ids.get(x.id);

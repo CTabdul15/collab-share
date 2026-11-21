@@ -23,7 +23,13 @@ desktop.ini
 
 # Your own saved whiteboards (the example in examples/ is kept)
 *.board.json
-!examples/*.board.json
+!examples/running-light.board.json
+!examples/press-sequence.board.json
+!examples/hydraulic-jog.board.json
+!examples/traffic-light.board.json
+!examples/counter-7seg.board.json
+!examples/drum-machine.board.json
+!examples/pressure-lockout.board.json
 
 # Design leftovers
 resources/icon-options.jpg
@@ -32,3 +38,6 @@ resources/icon-options.jpg
 test/visual*.js
 test/shots.js
 test/hostgone.js
+
+# Generated test page
+test/sandbox-page.html

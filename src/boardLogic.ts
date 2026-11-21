@@ -33,12 +33,12 @@ export class BoardLogic {
     for (const [key, change] of e.changes.keys) {
       const s = this.shapes.get(key);
       // A click can be shorter than a tick: remember the press so it still counts.
-      if (change.action !== 'delete' && s?.kind === 'BUTTON' && s.value) this.sim.press(key);
+      if (change.action !== 'delete' && (s?.kind === 'BUTTON' || s?.kind === 'LIMIT') && s.value) this.sim.press(key);
     }
     this.reload();
   };
 
-  constructor(doc: Y.Doc) {
+  constructor(private readonly doc: Y.Doc) {
     this.shapes = doc.getMap('shapes');
     this.shapes.observe(this.observer);
     this.reload();
@@ -73,6 +73,18 @@ export class BoardLogic {
     this.lastTick = now;
     for (let i = 0; i < n; i++) this.sim.step();
     if (n > 0) this.publish();
+    // Steel blocks pushed by cylinders: once they stop, their new place becomes part of the board
+    // (so selecting, saving and late joiners all see it). The first push remembers where it started.
+    const moved: { id: string; x: number; y: number; rot: number }[] = this.sim.settledBlocks();
+    if (moved.length) {
+      this.doc.transact(() => {
+        for (const m of moved) {
+          const s = this.shapes.get(m.id);
+          if (!s) continue;
+          this.shapes.set(m.id, { ...s, x: m.x, y: m.y, rot: m.rot || undefined, home: s.home ?? { x: s.x, y: s.y, rot: s.rot || 0 } });
+        }
+      }, 'sim');
+    }
   }
 
   private publish(): void {

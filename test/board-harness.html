@@ -12,7 +12,7 @@
     postMessage(m) {
       window.__sent.push(m);
       if (m.type === 'ready') {
-        setTimeout(() => window.postMessage({ type: 'init', me: { id: 1, name: 'Tester', color: '#ff6b6b' }, readOnly: false, shapes: [] }, '*'), 0);
+        setTimeout(() => window.postMessage({ type: 'init', me: { id: 0, name: 'Tester', color: '#ff6b6b' }, isHost: true, readOnly: false, shapes: [] }, '*'), 0);
       } else if (m.type === 'batch') {
         for (const id of m.del || []) store.delete(id);
         for (const s of m.set || []) store.set(s.id, s);
@@ -26,7 +26,7 @@
   let sim = null;
   function hostStep() {
     sim = sim || new window.CollabCircuit.Sim();
-    for (const s of store.values()) if (s.kind === 'BUTTON' && s.value) sim.press(s.id);
+    for (const s of store.values()) if ((s.kind === 'BUTTON' || s.kind === 'LIMIT') && s.value) sim.press(s.id);
     sim.load([...store.values()]);
     push();
   }
@@ -39,7 +39,7 @@
 <canvas id="c" tabindex="0"></canvas>
 <div id="bar" class="bar">
   <button data-tool="select">select</button><button data-tool="hand">hand</button>
-  <button data-tool="pen">pen</button><button data-tool="rect">rect</button><button data-tool="note">note</button><button data-tool="eraser">eraser</button>
+  <button data-tool="pen">pen</button><button data-tool="rect">rect</button><button data-tool="note">note</button><button data-tool="bucket">bucket</button><button data-tool="eraser">eraser</button>
   <button data-tool="nodes"><span>Nodes</span></button>
   <button class="sw" data-color="#ffffff"></button><button class="sw" data-color="#ff6b6b"></button>
   <input id="custom" type="color" value="#ffffff">
@@ -49,12 +49,13 @@
   <button id="clear"><span>Clear</span></button>
 </div>
 <div id="selbar" class="bar"><span id="selcount"></span><button id="dup">dup</button><button id="front">front</button><button id="back">back</button><button id="rotl">rotl</button><button id="rotr">rotr</button><button id="del">del</button></div>
-<div id="nodes"><button data-node="SWITCH">SWITCH</button><button data-node="AND">AND</button><button data-node="NOT">NOT</button><button data-node="LAMP">LAMP</button><button data-node="NUMBER">NUMBER</button><button data-node="CLAMP">CLAMP</button><button data-node="DISPLAY">DISPLAY</button><button data-node="BUTTON">BUTTON</button><button data-node="LEVER">LEVER</button><button data-node="TFF">TFF</button><button data-node="DFF">DFF</button><button data-node="JKFF">JKFF</button><button data-node="SR">SR</button><button data-node="DLATCH">DLATCH</button><button data-node="COUNTER">COUNTER</button><button data-node="CLOCK">CLOCK</button><button data-node="DELAY">DELAY</button><button data-node="PULSE">PULSE</button><button data-node="MOTOR">MOTOR</button><button data-node="SEG7">SEG7</button><button data-node="BUZZER">BUZZER</button><button data-node="NOTE">NOTE</button><button data-node="AND3">AND3</button><button data-node="DRUMKIT">DRUMKIT</button></div>
+<div id="perf"></div><div id="nodes"></div><div id="helpbox"></div><button id="help">help</button>
 <div id="ro"></div>
 <textarea id="edit"></textarea><div id="props"></div>
 <div id="title"><div>Harness</div><div><span id="authors"></span></div><div><span id="scale"></span></div></div>
 <div id="hint"></div>
 <script src="../media/circuit.js"></script>
+<script src="../media/catalog.js"></script>
 <script src="../media/whiteboard.js"></script>
 </body>
 </html>
