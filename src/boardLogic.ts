@@ -3,6 +3,9 @@ import * as Y from 'yjs';
 // Plain JS shared with the whiteboard webview (bundled by esbuild).
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const circuit = require('../media/circuit.js');
+// Extra parts + 2D physics plug into the same simulator.
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+require('../media/parts.js');
 
 export interface SimSnapshot {
   tick: number;
@@ -89,7 +92,7 @@ export class BoardLogic {
 
   private publish(): void {
     const snap = this.sim.snapshot() as SimSnapshot;
-    const key = JSON.stringify([snap.v, snap.i, snap.s]);
+    const key = JSON.stringify([snap.v, snap.i, snap.s, (snap as any).p, (snap as any).sp, (snap as any).off]);
     if (key === this.lastSent) return;
     this.lastSent = key;
     this.emitter.fire(snap);

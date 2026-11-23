@@ -1,0 +1,168 @@
+{
+ "format": "collab-share-whiteboard",
+ "version": 1,
+ "saved": "2026-11-21T12:00:00.000Z",
+ "shapes": [
+  {
+   "id": "readme",
+   "type": "note",
+   "x": -420,
+   "y": -290,
+   "w": 340,
+   "h": 200,
+   "text": "PID control: the slider is the setpoint, the low-pass filter is a slow \"process\" (like a heater). The PID controller drives it so the meter follows the slider. Watch both on the oscilloscope and change Kp / Ki with the gear.",
+   "color": "#ffd166",
+   "by": "Collab Share example",
+   "t": 1,
+   "z": 2
+  },
+  {
+   "id": "set",
+   "type": "node",
+   "kind": "SLIDER",
+   "x": -420,
+   "y": 0,
+   "by": "Collab Share example",
+   "t": 2,
+   "z": 3,
+   "value": 70
+  },
+  {
+   "id": "pid",
+   "type": "node",
+   "kind": "PID",
+   "x": -180,
+   "y": -10,
+   "by": "Collab Share example",
+   "t": 3,
+   "z": 4,
+   "kp": 1.2,
+   "ki": 0.6,
+   "kd": 0,
+   "lim": 200
+  },
+  {
+   "id": "plant",
+   "type": "node",
+   "kind": "LOWPASS",
+   "x": 60,
+   "y": -10,
+   "by": "Collab Share example",
+   "t": 4,
+   "z": 5,
+   "value": 1.5
+  },
+  {
+   "id": "meter",
+   "type": "node",
+   "kind": "METER",
+   "x": 300,
+   "y": -40,
+   "by": "Collab Share example",
+   "t": 5,
+   "z": 6,
+   "value": 100
+  },
+  {
+   "id": "scope",
+   "type": "node",
+   "kind": "SCOPE",
+   "x": 300,
+   "y": 100,
+   "by": "Collab Share example",
+   "t": 6,
+   "z": 7,
+   "value": 100
+  },
+  {
+   "id": "w-set.0-pid.0",
+   "type": "wire",
+   "a": {
+    "n": "set",
+    "p": 0
+   },
+   "b": {
+    "n": "pid",
+    "p": 0
+   },
+   "by": "Collab Share example",
+   "t": 7,
+   "z": 0
+  },
+  {
+   "id": "w-pid.0-plant.0",
+   "type": "wire",
+   "a": {
+    "n": "pid",
+    "p": 0
+   },
+   "b": {
+    "n": "plant",
+    "p": 0
+   },
+   "by": "Collab Share example",
+   "t": 8,
+   "z": 0
+  },
+  {
+   "id": "w-plant.0-pid.1",
+   "type": "wire",
+   "a": {
+    "n": "plant",
+    "p": 0
+   },
+   "b": {
+    "n": "pid",
+    "p": 1
+   },
+   "by": "Collab Share example",
+   "t": 9,
+   "z": 0
+  },
+  {
+   "id": "w-plant.0-meter.0",
+   "type": "wire",
+   "a": {
+    "n": "plant",
+    "p": 0
+   },
+   "b": {
+    "n": "meter",
+    "p": 0
+   },
+   "by": "Collab Share example",
+   "t": 10,
+   "z": 0
+  },
+  {
+   "id": "w-set.0-scope.0",
+   "type": "wire",
+   "a": {
+    "n": "set",
+    "p": 0
+   },
+   "b": {
+    "n": "scope",
+    "p": 0
+   },
+   "by": "Collab Share example",
+   "t": 11,
+   "z": 0
+  },
+  {
+   "id": "w-plant.0-scope.1",
+   "type": "wire",
+   "a": {
+    "n": "plant",
+    "p": 0
+   },
+   "b": {
+    "n": "scope",
+    "p": 1
+   },
+   "by": "Collab Share example",
+   "t": 12,
+   "z": 0
+  }
+ ]
+}

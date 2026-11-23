@@ -1,5 +1,37 @@
 # Changelog
 
+## 1.2.3
+
+- Fixed: resizing by dragging the corner handles did nothing (for all shapes, notes and resizable parts).
+- Fixed: hitboxes and selection boxes of many modules were too short; pins of resized parts (e.g. the light barrier) now stay on the part's edge.
+- Steel, lead, aluminium and bedrock no longer bounce: hard materials only make a dull impact; rubber, foam and trampolines still bounce.
+- **Resets:** the light barrier, PID, sample & hold get a Reset input, the accumulator a Dump input, and every part that remembers something (counters, flip-flops, timers, filters, randomizer…) has a ↺ Reset button in its settings. A light barrier that is new or moved starts counting from 0.
+- Examples: marble run displays moved off the wall, the rocket cart track has an end stop.
+
+## 1.2.2
+
+- Fixed: moving parts only updated on screen when something else changed (a button press). Falling, rolling and driving now show continuously for everyone.
+- **Physics on/off** for the host (⋯ menu): pauses all physics for everyone; a "Physics paused" badge shows while it is off.
+- **Glue**: a resizable adhesive patch that sticks every part it overlaps together, or fixes a part to bedrock.
+
+## 1.2.1
+
+- **6 new examples** in Open: Marble run, Rocket cart, Counting line, Hydraulic press (force plate in kN), PID control loop, Electronic dice.
+- Fixed: pushing forces (thrusters, springs, magnets, nozzles) were several times too strong; thrusters now use real newtons (default 400 N).
+- Fixed: a force plate kept showing the force of a cylinder resting on it only for a moment; it now shows it the whole time.
+
+## 1.2.0
+
+The Sandbox is now a 2D physics sandbox (side view with gravity):
+- **Real 2D physics** for mechanical parts: gravity, collisions, friction, bounce, rotation, joints and motors. Moving parts are drawn smoothly; when they come to rest their new place is saved for everyone.
+- **Vehicles:** put Wheels on a Beam (they mount on an axle automatically) and drive them with a signal or a Joystick. Weld parts together, add Thrusters, Servo hinges, Springs, Ropes and Electromagnets.
+- **Ball** with bouncy, rolling physics (rubber, steel, foam… materials).
+- **Metal pushes metal** properly: steel blocks are solid bodies that push each other, stack, tip over and are recolorable (color buttons / fill bucket). Cylinder rods push them and stop when something is jammed or fixed — two cylinders on one block simply hold.
+- **New bedrock design** (engineering "fixed ground" hatch), plus ramps, trampolines, bumpers and conveyor belts.
+- **Circuit-board look:** electronics are green PCBs with gold trim; hydraulics are yellowish.
+- **61 new parts** — mechanics (Wheel, Beam, Ball, Counterweight, Ramp, Conveyor, Trampoline, Bumper), joints & actuators (Axle, Weld, Servo hinge, Spring, Rope, Thruster, Electromagnet), sensors (Light barrier, Force plate / newton meter, Area sensor, Speed sensor, Pressure switch), hydraulics (Nozzle, Accumulator, Pressure relief, Shuttle valve, Two-pressure valve, Hydraulic motor), logic (Randomizer, Edge detector, Shift register, Register, Sample & hold, Multiplexer, Decoder), timing (On-delay, Off-delay, PWM), math & control (Square root, Power, Sine, Round, Scale, Schmitt trigger, Low-pass, Integrator, Rate limiter, PID), controls (Emergency stop, Selector switch, Slider, Joystick, Battery) and indicators (LED, RGB LED, Stack light, Rotating beacon, Bar graph, Panel meter, Oscilloscope, Relay).
+- New example: **Physics playground** (joystick car, ball, light barrier counter, seesaw, pendulum, conveyor, trampoline).
+
 ## 1.1.3
 
 - Fixed: an open toolbar dropdown was covered by the selection bar when something was selected.

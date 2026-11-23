@@ -30,6 +30,13 @@ desktop.ini
 !examples/counter-7seg.board.json
 !examples/drum-machine.board.json
 !examples/pressure-lockout.board.json
+!examples/physics-playground.board.json
+!examples/marble-run.board.json
+!examples/rocket-cart.board.json
+!examples/counting-line.board.json
+!examples/hydraulic-press.board.json
+!examples/pid-control.board.json
+!examples/electronic-dice.board.json
 
 # Design leftovers
 resources/icon-options.jpg

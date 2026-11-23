@@ -3,16 +3,19 @@
   'use strict';
 
   const CATEGORIES = [
+    { id: 'mech', title: 'Mechanics & vehicles', color: '#94a3b8', icon: '⚙', items: ['WHEEL', 'BEAM', 'STEEL', 'BALL', 'COUNTERWEIGHT', 'RAMP', 'BEDROCK', 'CONVEYOR', 'TRAMPOLINE', 'BUMPER'] },
+    { id: 'joints', title: 'Joints & actuators', color: '#f59e0b', icon: '⊕', items: ['AXLE', 'WELD', 'GLUE', 'SERVO', 'SPRING', 'ROPE', 'THRUSTER', 'MAGNET'] },
+    { id: 'sensors', title: 'Sensors', color: '#14b8a6', icon: '◎', items: ['LIMIT', 'DETECTOR', 'NEWTON', 'ZONE', 'SPEEDO', 'PRESSURE_SW'] },
     { id: 'gates', title: 'Logic gates', color: '#22c55e', icon: '⋀', items: ['AND', 'OR', 'NOT', 'XOR', 'NAND', 'NOR', 'XNOR', 'BUF', 'AND3', 'OR3'] },
-    { id: 'memory', title: 'Memory', color: '#a855f7', icon: '⧉', items: ['SR', 'DLATCH', 'DFF', 'TFF', 'JKFF', 'COUNTER'] },
-    { id: 'timing', title: 'Timing', color: '#06b6d4', icon: '⏱', items: ['CLOCK', 'DELAY', 'PULSE'] },
-    { id: 'inputs', title: 'Inputs & sensors', color: '#f59e0b', icon: '◉', items: ['BUTTON', 'LEVER', 'SWITCH', 'POT', 'NUMBER', 'LIMIT'] },
-    { id: 'outputs', title: 'Outputs', color: '#3b82f6', icon: '◐', items: ['LAMP', 'DISPLAY', 'SEG7', 'MOTOR'] },
-    { id: 'fluid', title: 'Fluid power', color: '#f5a524', icon: '≋', items: ['PUMP', 'VALVE_3_2', 'VALVE_5_2', 'VALVE_4_3', 'VALVE', 'FLOW', 'FLOW_1W', 'CYL_DA', 'CYLINDER', 'GAUGE'] },
-    { id: 'physics', title: 'Physics', color: '#94a3b8', icon: '■', items: ['STEEL', 'BEDROCK'] },
+    { id: 'memory', title: 'Memory & digital', color: '#a855f7', icon: '⧉', items: ['SR', 'DLATCH', 'DFF', 'TFF', 'JKFF', 'COUNTER', 'RANDOM', 'EDGE', 'SHIFT', 'REGISTER', 'SAMPLEHOLD', 'MUX4', 'DECODER'] },
+    { id: 'timing', title: 'Timing', color: '#06b6d4', icon: '⏱', items: ['CLOCK', 'DELAY', 'PULSE', 'TON', 'TOF', 'PWM'] },
+    { id: 'inputs', title: 'Inputs & controls', color: '#eab308', icon: '◉', items: ['BUTTON', 'ESTOP', 'LEVER', 'SWITCH', 'SELECTOR', 'POT', 'SLIDER', 'JOYSTICK', 'NUMBER', 'BATTERY'] },
+    { id: 'outputs', title: 'Outputs & indicators', color: '#3b82f6', icon: '◐', items: ['LAMP', 'LED', 'RGBLED', 'STACKLIGHT', 'BEACON', 'BARGRAPH', 'METER', 'SCOPE', 'DISPLAY', 'SEG7', 'MOTOR', 'RELAY'] },
+    { id: 'fluid', title: 'Fluid power', color: '#f5a524', icon: '≋', items: ['PUMP', 'VALVE_3_2', 'VALVE_5_2', 'VALVE_4_3', 'VALVE', 'FLOW', 'FLOW_1W', 'CYL_DA', 'CYLINDER', 'GAUGE', 'ACCUMULATOR', 'RELIEF', 'SHUTTLE', 'TWOPRESS', 'HYDMOTOR', 'NOZZLE'] },
+    { id: 'math', title: 'Math & control', color: '#10b981', icon: 'ƒ', items: ['ADD', 'SUB', 'MUL', 'DIV', 'MOD', 'ABS', 'MIN', 'MAX', 'CLAMP', 'LERP', 'SELECT', 'GT', 'LT', 'EQ', 'SQRT', 'POW', 'SIN', 'ROUND', 'MAP', 'SCHMITT', 'LOWPASS', 'INTEGRATOR', 'RATELIMIT', 'PID'] },
     { id: 'sound', title: 'Sound', color: '#ec4899', icon: '♪', items: ['NOTE', 'DRUMKIT', 'BUZZER'] },
-    { id: 'math', title: 'Math & compare', color: '#10b981', icon: 'ƒ', items: ['ADD', 'SUB', 'MUL', 'DIV', 'MOD', 'ABS', 'MIN', 'MAX', 'CLAMP', 'LERP', 'SELECT', 'GT', 'LT', 'EQ'] },
   ];
+
 
   /** Name in the inventory + what it does (for the help panel and card tooltips). */
   const HELP = {
@@ -55,8 +58,6 @@
     CYL_DA: ['Double-acting cylinder', 'Pressure on A pushes the rod out, pressure on B pulls it in. Force (kN) = pressure × piston area. The rod presses limit sensors and pushes steel blocks. Gear: bore, rod, load.'],
     CYLINDER: ['Single-acting cylinder', 'Pressure on A pushes the rod out; a spring pulls it back when the pressure is gone. Gear: bore, rod, load.'],
     GAUGE: ['Pressure gauge', 'Shows the pressure on a dial. Over turns on at or above the set pressure. Gear: set pressure and dial range.'],
-    STEEL: ['Steel block', 'A solid block a cylinder rod can push. Resize it with its corner handles. Gear: a rotation point (pivot) — then it turns around that point like a lever instead of sliding — or fix it in place. Reset puts it back.'],
-    BEDROCK: ['Bedrock', 'A block that never moves. Cylinders and steel blocks stop against it.'],
     NOTE: ['Note block', 'Plays a note each time its input turns on. Gear: instrument (piano, square, phonk bell, 808…) and note.'],
     DRUMKIT: ['Drum kit', 'Each input plays its drum when it turns on: kick, snare, hi-hat, clap, cowbell.'],
     BUZZER: ['Buzzer', 'Beeps while its input is on. Gear: pitch (Hz) and wave shape.'],

@@ -2,7 +2,7 @@
   "name": "collab-share",
   "displayName": "Collab Share",
   "description": "Free Live Share alternative: code together in real time with friends anywhere. Shared editing, cursors, IntelliSense from the host, and a blueprint Sandbox with a live logic and fluid power simulator.",
-  "version": "1.1.3",
+  "version": "1.2.3",
   "publisher": "CTabdul15",
   "icon": "resources/icon.png",
   "galleryBanner": {

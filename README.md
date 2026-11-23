@@ -79,14 +79,16 @@ Run **Collab: Join Session** (or use the **Collab Share** icon in the left bar) 
   - timing (Clock, Delay, Pulse);
   - inputs (Push Button with NO/NC and momentary/latching, Lever, Switch, Limit Sensor, Speed Knob, Number);
   - outputs (Lamp, Motor, 7-Segment, Display);
-  - physics (Steel Block that rods push, slide or turn around a pivot; Bedrock that never moves);
+  - mechanics & vehicles with real 2D physics and gravity (wheels, beams, steel, ball, counterweight, ramp, conveyor, trampoline, bumper, bedrock);
+  - joints & actuators (axle, weld, servo hinge, spring, rope, thruster, electromagnet) and sensors (light barrier, force plate, area sensor, speed sensor);
+  - indicators & controls (LED, RGB LED, stack light, beacon, bar graph, panel meter, oscilloscope, relay, e-stop, selector, slider, joystick, battery);
   - sound (Note Block with 9 instruments, Drum Kit, Buzzer);
   - fluid power, ISO style: pump, 3/2, 5/2, 4/3 and 2/2 valves, single- and double-acting cylinders, flow control and throttle check valve (speed knobs), limit sensors (triggered by the cylinder rod), pressure gauge;
   - math (Clamp, Lerp, Add, Subtract, Multiply, Divide, Modulo, Min, Max, Abs, Select, >, <, =).
 - **Wires:** drag from pin to pin. Red = on, black = off, gray = not connected; hydraulic lines are blue. Point at a pin to see what it is. Click the ⚙ gear on a module to change its settings.
 - **Help (F1):** explains every part in the inventory.
 - **Background:** the host picks blue, black, gray or green for everyone.
-- **Examples:** the Open button includes a fluid power press, a pressure lockout, a hydraulic jog with a 4/3 valve, a traffic light, a counter with a 7-segment display, a drum machine and a running light.
+- **Examples:** the Open button includes a physics playground (drive a car with a joystick), a fluid power press, a pressure lockout, a hydraulic jog with a 4/3 valve, a traffic light, a counter with a 7-segment display, a drum machine and a running light.
 - **Settings:** click the gear on a module to change its settings.
 - **Sound:** turn it on with the **Sound** button. Click the gear on a Note Block or Buzzer to pick the instrument or wave, then press **▶ Test sound**.
 

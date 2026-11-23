@@ -9,6 +9,7 @@
 const fs = require('fs');
 const path = require('path');
 const C = require('../media/circuit.js');
+require('../media/parts.js'); // extra parts + 2D physics
 
 const by = 'Collab Share example';
 function board() {
@@ -227,6 +228,211 @@ function save(name, shapes) {
   expect(s.v('lock')[0] === false && s.v('pump')[0] > 0, 'lockout: START off and on again resets the lock');
   lever.value = false;
   save('pressure-lockout.board.json', b.shapes);
+}
+
+// ===================================================================== physics playground
+// A car driven by a joystick, a ball to push, a light barrier with a counter, a seesaw with a counterweight,
+// a pendulum on a rope, a conveyor and a trampoline.
+{
+  const b = board();
+  b.note(-640, -420, 380, 170, 'Physics playground: drag the JOYSTICK right/left to drive the car and push the ball over the light barrier (it counts). The CONVEYOR lever runs the belt. Drop a steel block on the seesaw or the trampoline and watch it bounce. Everything is real 2D physics with gravity: place wheels on a beam to build your own vehicles.');
+  b.node('floor', 'BEDROCK', -660, 400, { bw: 2460, bh: 40 });
+  b.node('wallL', 'BEDROCK', -700, 100, { bw: 40, bh: 340 });
+  b.node('ramp', 'RAMP', 520, 320, { bw: 220, bh: 80 });
+  b.node('joy', 'JOYSTICK', -640, 140);
+  b.node('car', 'BEAM', -420, 318, { bw: 220, bh: 20, color: '#ef4444' });
+  b.node('wf', 'WHEEL', -440, 308); b.node('wr', 'WHEEL', -240, 308);
+  b.node('cab', 'STEEL', -380, 268, { bw: 70, bh: 50, color: '#ef4444' }); b.node('weld', 'WELD', -356, 307); // on the seam between cab and beam
+  b.wire('joy', 0, 'wf', 0); b.wire('joy', 0, 'wr', 0);
+  b.node('ball', 'BALL', 0, 300, { bw: 70, bh: 70 });
+  b.node('barrier', 'DETECTOR', 220, 250, { bw: 150, bh: 26, rot: 90 });
+  b.node('count', 'SEG7', 300, 120);
+  b.wire('barrier', 1, 'count', 0);
+  b.node('beacon', 'BEACON', 380, 110); b.wire('barrier', 0, 'beacon', 0);
+  // seesaw: beam on an axle over a fixed post, counterweight on one end
+  b.node('post', 'BEDROCK', 900, 330, { bw: 30, bh: 70 });
+  b.node('seesaw', 'BEAM', 790, 312, { bw: 250, bh: 16, color: '#facc15' });
+  b.node('pivot', 'AXLE', 904, 309);
+  b.node('cw', 'COUNTERWEIGHT', 1000, 250, { bw: 36, bh: 36 });
+  // pendulum
+  b.node('hook', 'BEDROCK', 1180, 40, { bw: 60, bh: 20 });
+  b.node('rope', 'ROPE', 1150, 120, { bw: 160, bh: 10, rot: 60 });
+  b.node('bob', 'BALL', 1245, 169, { bw: 50, bh: 50, material: 'steel', color: '#9ca3af' }); // centered on the rope's lower end
+  // conveyor + trampoline
+  b.node('runBelt', 'LEVER', 1300, 160, { value: false });
+  b.node('belt', 'CONVEYOR', 1300, 300, { bw: 240, bh: 24 });
+  b.wire('runBelt', 0, 'belt', 0);
+  b.node('box', 'STEEL', 1330, 230, { bw: 50, bh: 50, color: '#3b82f6' });
+  b.node('tramp', 'TRAMPOLINE', 1600, 376, { bw: 140, bh: 24 });
+  b.node('drop', 'BALL', 1645, 120, { bw: 44, bh: 44, color: '#22c55e' });
+  const s = simOf(b.shapes);
+  s.steps(30); // let everything settle
+  const W = s.sim.__phys.world.bodies;
+  const x0 = W.get('car').x;
+  const joy = b.shapes.find((x) => x.id === 'joy');
+  joy.jx = 1; s.load();
+  let maxTilt = 0;
+  for (let i = 0; i < 300 && W.get('ball').x < 400; i++) { s.sim.step(); maxTilt = Math.max(maxTilt, Math.abs(W.get('car').a)); }
+  expect(W.get('car').x - x0 > 150 && maxTilt < 0.35, 'playground: joystick drives the car (' + Math.round(W.get('car').x - x0) + ' cm, stays level)');
+  joy.jx = 0; s.load(); s.steps(60);
+  expect(W.get('ball').x > 380, 'playground: the car pushes the ball across the barrier (ball at ' + Math.round(W.get('ball').x) + ')');
+  expect(s.v('barrier')[1] >= 1, 'playground: light barrier counted ' + s.v('barrier')[1]);
+  joy.jx = 0; s.load();
+  expect(W.get('seesaw').a > 0.05, 'playground: counterweight tips the seesaw (' + Math.round((W.get('seesaw').a * 180) / Math.PI) + '°)');
+  const by = W.get('drop').y;
+  expect(by < 360, 'playground: the ball bounces on the trampoline');
+  b.shapes.find((x) => x.id === 'runBelt').value = true; s.load();
+  const bx0 = W.get('box').x; s.steps(40);
+  expect(W.get('box').x - bx0 > 30, 'playground: the conveyor carries the box (' + Math.round(W.get('box').x - bx0) + ' cm)');
+  b.shapes.find((x) => x.id === 'runBelt').value = false; joy.jx = 0;
+  save('physics-playground.board.json', b.shapes);
+}
+
+// ===================================================================== marble run
+{
+  const b = board();
+  b.note(-420, -260 - 60, 340, 200, 'Marble run: the ball rolls down two slopes, past a light barrier (counts and flashes the beacon) and drops onto a trampoline. The area sensor at the bottom lights the green lamp when it arrives. Move the slopes or add bumpers and try again (Ctrl+Z puts the ball back).');
+  b.node('ball', 'BALL', 0, -40, { bw: 40, bh: 40, color: '#f97316' });
+  b.node('slope1', 'BEDROCK', -40, 100, { bw: 380, bh: 20, rot: 12 });
+  b.node('slope2', 'BEDROCK', 200, 300, { bw: 380, bh: 20, rot: 348 });
+  b.node('stop', 'BUMPER', 560, 210, { bw: 40, bh: 40 });
+  b.node('wall', 'BEDROCK', 620, -60, { bw: 40, bh: 640 });
+  b.node('floor', 'BEDROCK', -200, 560, { bw: 900, bh: 40 });
+  b.node('tramp', 'TRAMPOLINE', 60, 536, { bw: 160, bh: 24 });
+  b.node('gate', 'DETECTOR', 380, 230, { bw: 140, bh: 26, rot: 90 });
+  b.node('beacon', 'BEACON', 700, 140); b.wire('gate', 0, 'beacon', 0);
+  b.node('hits', 'SEG7', 700, 0); b.wire('gate', 1, 'hits', 0);
+  b.node('landing', 'ZONE', -200, 440, { bw: 900, bh: 120 });
+  b.node('done', 'LAMP', 720, 300, { color: '#22c55e' }); b.wire('landing', 0, 'done', 0);
+  const s = simOf(b.shapes);
+  let seen = false; s.steps(400, () => { seen = seen || s.v('landing')[0]; });
+  expect(s.v('gate')[1] >= 1, 'marble run: the ball passes the light barrier (' + s.v('gate')[1] + ')');
+  expect(seen, 'marble run: the ball reaches the landing area');
+  save('marble-run.board.json', b.shapes);
+}
+
+// ===================================================================== PID control loop
+{
+  const b = board();
+  b.note(-420, -230 - 60, 340, 200, 'PID control: the slider is the setpoint, the low-pass filter is a slow "process" (like a heater). The PID controller drives it so the meter follows the slider. Watch both on the oscilloscope and change Kp / Ki with the gear.');
+  b.node('set', 'SLIDER', -420, 0, { value: 70 });
+  b.node('pid', 'PID', -180, -10, { kp: 1.2, ki: 0.6, kd: 0, lim: 200 });
+  b.node('plant', 'LOWPASS', 60, -10, { value: 1.5 });
+  b.node('meter', 'METER', 300, -40, { value: 100 });
+  b.node('scope', 'SCOPE', 300, 100, { value: 100 });
+  b.wire('set', 0, 'pid', 0); b.wire('pid', 0, 'plant', 0); b.wire('plant', 0, 'pid', 1);
+  b.wire('plant', 0, 'meter', 0); b.wire('set', 0, 'scope', 0); b.wire('plant', 0, 'scope', 1);
+  const s = simOf(b.shapes);
+  s.steps(300);
+  const y = s.v('plant')[0];
+  expect(Math.abs(y - 70) < 3, 'pid: the process settles at the setpoint (' + y.toFixed(1) + ' / 70)');
+  b.shapes.find((x) => x.id === 'set').value = 30; s.load(); s.steps(300);
+  expect(Math.abs(s.v('plant')[0] - 30) < 3, 'pid: follows a new setpoint (' + s.v('plant')[0].toFixed(1) + ' / 30)');
+  b.shapes.find((x) => x.id === 'set').value = 70;
+  save('pid-control.board.json', b.shapes);
+}
+
+// ===================================================================== hydraulic press with a force plate
+{
+  const b = board();
+  b.note(-460, -230 - 60, 340, 200, 'Hydraulic press: flip PRESS. The 5/2 valve sends oil to A and the cylinder presses down on the force plate. The meter shows the force in kN; the stack light turns green above 5 kN. Change the cylinder bore or the pump pressure and compare the force.');
+  b.node('press', 'LEVER', -460, 60, { value: false });
+  b.node('pump', 'PUMP', -460, 200, { value: 100 });
+  b.node('valve', 'VALVE_5_2', -270, 220);
+  b.node('cyl', 'CYL_DA', 0, 0, { rot: 90, bore: 40 });
+  b.node('plate', 'NEWTON', 62, 250, { bw: 120, bh: 22, value: 5000 });
+  b.node('base', 'BEDROCK', -20, 272, { bw: 280, bh: 40 });
+  b.node('kN', 'DIV', 300, 120); b.node('k1000', 'NUMBER', 300, 260, { value: 1000 });
+  b.wire('plate', 0, 'kN', 0); b.wire('k1000', 0, 'kN', 1);
+  b.node('meter', 'METER', 520, 100, { value: 20 }); b.wire('kN', 0, 'meter', 0);
+  b.node('light', 'STACKLIGHT', 700, 60); b.wire('plate', 1, 'light', 2);
+  b.node('notOver', 'NOT', 560, 260); b.wire('plate', 1, 'notOver', 0); b.wire('notOver', 0, 'light', 1);
+  b.wire('press', 0, 'valve', 1); b.wire('pump', 0, 'valve', 0); b.wire('valve', 0, 'cyl', 0); b.wire('valve', 1, 'cyl', 1);
+  const s = simOf(b.shapes);
+  s.steps(20);
+  b.shapes.find((x) => x.id === 'press').value = true; s.load(); s.steps(80);
+  const F = s.v('plate')[0];
+  expect(F > 11000 && F < 14000, 'press: force plate reads the cylinder force (' + (F / 1000).toFixed(1) + ' kN, Ø40 at 100 bar ≈ 12.6 kN)');
+  expect(s.v('plate')[1] === true, 'press: stack light green above 5 kN');
+  b.shapes.find((x) => x.id === 'press').value = false;
+  save('hydraulic-press.board.json', b.shapes);
+}
+
+// ===================================================================== rocket cart
+{
+  const b = board();
+  b.note(-520, -230 - 60, 320, 200, 'Rocket cart: hit FIRE (it latches). The thruster mounted on the cart pushes it along the track; the speed sensor on the cart shows its speed. Hit FIRE again to cut the thrust. Aim the thruster by rotating it.');
+  b.node('track', 'BEDROCK', -540, 400, { bw: 2600, bh: 40 });
+  b.node('endStop', 'BEDROCK', 2020, 240, { bw: 40, bh: 160 });
+  b.node('buffer', 'BUMPER', 1980, 340, { bw: 50, bh: 50 });
+  b.node('fire', 'BUTTON', -520, 100, { latch: true, value: false, color: '#ef4444' });
+  b.node('cart', 'BEAM', -300, 318, { bw: 200, bh: 20, color: '#3b82f6' });
+  b.node('w1', 'WHEEL', -320, 308, { bw: 50, bh: 50 }); b.node('w2', 'WHEEL', -150, 308, { bw: 50, bh: 50 });
+  b.node('jet', 'THRUSTER', -290, 315, { value: 80 });
+  b.node('speed', 'SPEEDO', -180, 314);
+  b.node('show', 'DISPLAY', -300, 120); b.wire('speed', 0, 'show', 0);
+  b.wire('fire', 0, 'jet', 0);
+  const s = simOf(b.shapes);
+  s.steps(30);
+  const W = s.sim.__phys.world.bodies, x0 = W.get('cart').x;
+  b.shapes.find((x) => x.id === 'fire').value = true; s.load(); s.steps(80);
+  expect(W.get('cart').x - x0 > 200, 'rocket: the thruster pushes the cart (' + Math.round(W.get('cart').x - x0) + ' cm in 4 s)');
+  expect(s.v('speed')[0] > 50, 'rocket: speed sensor reads ' + s.v('speed')[0] + ' cm/s');
+  b.shapes.find((x) => x.id === 'fire').value = false;
+  save('rocket-cart.board.json', b.shapes);
+}
+
+// ===================================================================== dice
+{
+  const b = board();
+  b.note(-420, -200 - 60, 320, 200, 'Electronic dice: hold ROLL — the randomizer runs fast; let go and it stops on 1 … 6. The RGB LED shows a random color for each throw.');
+  b.node('roll', 'BUTTON', -420, 20, { value: false });
+  b.node('clk', 'CLOCK', -420, 130, { value: 0.1 });
+  b.node('gate', 'AND', -260, 70);
+  b.node('rnd', 'RANDOM', -140, 40, { value: 5 });
+  b.node('one', 'NUMBER', -140, 180, { value: 1 });
+  b.node('plus', 'ADD', 80, 40);
+  b.node('face', 'SEG7', 320, 0);
+  b.node('r', 'RANDOM', 80, 200, { value: 1 }); b.node('g', 'RANDOM', 80, 320, { value: 1 });
+  b.node('rgb', 'RGBLED', 320, 160);
+  b.wire('roll', 0, 'gate', 0); b.wire('clk', 0, 'gate', 1); b.wire('gate', 0, 'rnd', 0);
+  b.wire('rnd', 1, 'plus', 0); b.wire('one', 0, 'plus', 1); b.wire('plus', 0, 'face', 0);
+  b.wire('gate', 0, 'r', 0); b.wire('gate', 0, 'g', 0);
+  b.wire('r', 0, 'rgb', 0); b.wire('g', 0, 'rgb', 1); b.wire('rnd', 0, 'rgb', 2);
+  const s = simOf(b.shapes);
+  const roll = b.shapes.find((x) => x.id === 'roll'); const faces = new Set();
+  roll.value = true; s.load(); s.steps(200, () => { s.sim.press('roll'); faces.add(s.v('plus')[0]); });
+  roll.value = false; s.load(); s.steps(5); const v = s.v('plus')[0]; s.steps(40);
+  expect([...faces].every((x) => x >= 1 && x <= 6) && faces.size >= 5, 'dice: rolls 1 … 6 while held (' + [...faces].sort().join(',') + ')');
+  expect(s.v('plus')[0] === v, 'dice: stops when you let go (shows ' + v + ')');
+  save('electronic-dice.board.json', b.shapes);
+}
+
+// ===================================================================== counting conveyor
+{
+  const b = board();
+  b.note(-460, -260 - 60, 360, 200, 'Counting line: turn RUN on. The belt carries the steel parts to the end, where they fall past a light barrier that counts them. After 3 parts the line stops by itself and the stack light turns green. Reset by turning RUN off and on (or move the parts back).');
+  b.node('run', 'LEVER', -460, 40, { value: false });
+  b.node('belt', 'CONVEYOR', -200, 300, { bw: 420, bh: 24 });
+  b.node('p1', 'STEEL', -180, 250, { bw: 44, bh: 44, color: '#ef4444' });
+  b.node('p2', 'STEEL', -100, 250, { bw: 44, bh: 44, color: '#facc15' });
+  b.node('p3', 'STEEL', -20, 250, { bw: 44, bh: 44, color: '#22c55e' });
+  b.node('floor', 'BEDROCK', -300, 480, { bw: 900, bh: 40 });
+  b.node('gate', 'DETECTOR', 240, 330, { bw: 140, bh: 26 });
+  b.node('three', 'NUMBER', -200, 520, { value: 3 });
+  b.node('enough', 'LT', 60, 520);
+  b.wire('gate', 1, 'enough', 0); b.wire('three', 0, 'enough', 1);
+  b.node('go', 'AND', -200, 120); b.wire('run', 0, 'go', 0); b.wire('enough', 0, 'go', 1); b.wire('go', 0, 'belt', 0);
+  b.node('count', 'SEG7', 420, 120); b.wire('gate', 1, 'count', 0);
+  b.node('light', 'STACKLIGHT', 540, 100); b.node('full', 'NOT', 420, 300);
+  b.wire('enough', 0, 'full', 0); b.wire('full', 0, 'light', 2); b.wire('go', 0, 'light', 1);
+  const s = simOf(b.shapes);
+  s.steps(20);
+  b.shapes.find((x) => x.id === 'run').value = true; s.load(); s.steps(400);
+  expect(s.v('gate')[1] >= 3, 'counting line: counts the parts (' + s.v('gate')[1] + ')');
+  expect(s.v('go')[0] === false, 'counting line: stops itself after 3 parts');
+  b.shapes.find((x) => x.id === 'run').value = false;
+  save('counting-line.board.json', b.shapes);
 }
 
 if (failed) process.exit(1);

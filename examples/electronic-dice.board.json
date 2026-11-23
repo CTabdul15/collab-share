@@ -1,0 +1,291 @@
+{
+ "format": "collab-share-whiteboard",
+ "version": 1,
+ "saved": "2026-11-21T12:00:00.000Z",
+ "shapes": [
+  {
+   "id": "readme",
+   "type": "note",
+   "x": -420,
+   "y": -260,
+   "w": 320,
+   "h": 200,
+   "text": "Electronic dice: hold ROLL — the randomizer runs fast; let go and it stops on 1 … 6. The RGB LED shows a random color for each throw.",
+   "color": "#ffd166",
+   "by": "Collab Share example",
+   "t": 1,
+   "z": 2
+  },
+  {
+   "id": "roll",
+   "type": "node",
+   "kind": "BUTTON",
+   "x": -420,
+   "y": 20,
+   "by": "Collab Share example",
+   "t": 2,
+   "z": 3,
+   "value": false
+  },
+  {
+   "id": "clk",
+   "type": "node",
+   "kind": "CLOCK",
+   "x": -420,
+   "y": 130,
+   "by": "Collab Share example",
+   "t": 3,
+   "z": 4,
+   "value": 0.1
+  },
+  {
+   "id": "gate",
+   "type": "node",
+   "kind": "AND",
+   "x": -260,
+   "y": 70,
+   "by": "Collab Share example",
+   "t": 4,
+   "z": 5
+  },
+  {
+   "id": "rnd",
+   "type": "node",
+   "kind": "RANDOM",
+   "x": -140,
+   "y": 40,
+   "by": "Collab Share example",
+   "t": 5,
+   "z": 6,
+   "value": 5
+  },
+  {
+   "id": "one",
+   "type": "node",
+   "kind": "NUMBER",
+   "x": -140,
+   "y": 180,
+   "by": "Collab Share example",
+   "t": 6,
+   "z": 7,
+   "value": 1
+  },
+  {
+   "id": "plus",
+   "type": "node",
+   "kind": "ADD",
+   "x": 80,
+   "y": 40,
+   "by": "Collab Share example",
+   "t": 7,
+   "z": 8
+  },
+  {
+   "id": "face",
+   "type": "node",
+   "kind": "SEG7",
+   "x": 320,
+   "y": 0,
+   "by": "Collab Share example",
+   "t": 8,
+   "z": 9
+  },
+  {
+   "id": "r",
+   "type": "node",
+   "kind": "RANDOM",
+   "x": 80,
+   "y": 200,
+   "by": "Collab Share example",
+   "t": 9,
+   "z": 10,
+   "value": 1
+  },
+  {
+   "id": "g",
+   "type": "node",
+   "kind": "RANDOM",
+   "x": 80,
+   "y": 320,
+   "by": "Collab Share example",
+   "t": 10,
+   "z": 11,
+   "value": 1
+  },
+  {
+   "id": "rgb",
+   "type": "node",
+   "kind": "RGBLED",
+   "x": 320,
+   "y": 160,
+   "by": "Collab Share example",
+   "t": 11,
+   "z": 12
+  },
+  {
+   "id": "w-roll.0-gate.0",
+   "type": "wire",
+   "a": {
+    "n": "roll",
+    "p": 0
+   },
+   "b": {
+    "n": "gate",
+    "p": 0
+   },
+   "by": "Collab Share example",
+   "t": 12,
+   "z": 0
+  },
+  {
+   "id": "w-clk.0-gate.1",
+   "type": "wire",
+   "a": {
+    "n": "clk",
+    "p": 0
+   },
+   "b": {
+    "n": "gate",
+    "p": 1
+   },
+   "by": "Collab Share example",
+   "t": 13,
+   "z": 0
+  },
+  {
+   "id": "w-gate.0-rnd.0",
+   "type": "wire",
+   "a": {
+    "n": "gate",
+    "p": 0
+   },
+   "b": {
+    "n": "rnd",
+    "p": 0
+   },
+   "by": "Collab Share example",
+   "t": 14,
+   "z": 0
+  },
+  {
+   "id": "w-rnd.1-plus.0",
+   "type": "wire",
+   "a": {
+    "n": "rnd",
+    "p": 1
+   },
+   "b": {
+    "n": "plus",
+    "p": 0
+   },
+   "by": "Collab Share example",
+   "t": 15,
+   "z": 0
+  },
+  {
+   "id": "w-one.0-plus.1",
+   "type": "wire",
+   "a": {
+    "n": "one",
+    "p": 0
+   },
+   "b": {
+    "n": "plus",
+    "p": 1
+   },
+   "by": "Collab Share example",
+   "t": 16,
+   "z": 0
+  },
+  {
+   "id": "w-plus.0-face.0",
+   "type": "wire",
+   "a": {
+    "n": "plus",
+    "p": 0
+   },
+   "b": {
+    "n": "face",
+    "p": 0
+   },
+   "by": "Collab Share example",
+   "t": 17,
+   "z": 0
+  },
+  {
+   "id": "w-gate.0-r.0",
+   "type": "wire",
+   "a": {
+    "n": "gate",
+    "p": 0
+   },
+   "b": {
+    "n": "r",
+    "p": 0
+   },
+   "by": "Collab Share example",
+   "t": 18,
+   "z": 0
+  },
+  {
+   "id": "w-gate.0-g.0",
+   "type": "wire",
+   "a": {
+    "n": "gate",
+    "p": 0
+   },
+   "b": {
+    "n": "g",
+    "p": 0
+   },
+   "by": "Collab Share example",
+   "t": 19,
+   "z": 0
+  },
+  {
+   "id": "w-r.0-rgb.0",
+   "type": "wire",
+   "a": {
+    "n": "r",
+    "p": 0
+   },
+   "b": {
+    "n": "rgb",
+    "p": 0
+   },
+   "by": "Collab Share example",
+   "t": 20,
+   "z": 0
+  },
+  {
+   "id": "w-g.0-rgb.1",
+   "type": "wire",
+   "a": {
+    "n": "g",
+    "p": 0
+   },
+   "b": {
+    "n": "rgb",
+    "p": 1
+   },
+   "by": "Collab Share example",
+   "t": 21,
+   "z": 0
+  },
+  {
+   "id": "w-rnd.0-rgb.2",
+   "type": "wire",
+   "a": {
+    "n": "rnd",
+    "p": 0
+   },
+   "b": {
+    "n": "rgb",
+    "p": 2
+   },
+   "by": "Collab Share example",
+   "t": 22,
+   "z": 0
+  }
+ ]
+}

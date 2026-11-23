@@ -1,0 +1,390 @@
+{
+ "format": "collab-share-whiteboard",
+ "version": 1,
+ "saved": "2026-11-21T12:00:00.000Z",
+ "shapes": [
+  {
+   "id": "readme",
+   "type": "note",
+   "x": -640,
+   "y": -420,
+   "w": 380,
+   "h": 170,
+   "text": "Physics playground: drag the JOYSTICK right/left to drive the car and push the ball over the light barrier (it counts). The CONVEYOR lever runs the belt. Drop a steel block on the seesaw or the trampoline and watch it bounce. Everything is real 2D physics with gravity: place wheels on a beam to build your own vehicles.",
+   "color": "#ffd166",
+   "by": "Collab Share example",
+   "t": 1,
+   "z": 2
+  },
+  {
+   "id": "floor",
+   "type": "node",
+   "kind": "BEDROCK",
+   "x": -660,
+   "y": 400,
+   "by": "Collab Share example",
+   "t": 2,
+   "z": 3,
+   "bw": 2460,
+   "bh": 40
+  },
+  {
+   "id": "wallL",
+   "type": "node",
+   "kind": "BEDROCK",
+   "x": -700,
+   "y": 100,
+   "by": "Collab Share example",
+   "t": 3,
+   "z": 4,
+   "bw": 40,
+   "bh": 340
+  },
+  {
+   "id": "ramp",
+   "type": "node",
+   "kind": "RAMP",
+   "x": 520,
+   "y": 320,
+   "by": "Collab Share example",
+   "t": 4,
+   "z": 5,
+   "bw": 220,
+   "bh": 80
+  },
+  {
+   "id": "joy",
+   "type": "node",
+   "kind": "JOYSTICK",
+   "x": -640,
+   "y": 140,
+   "by": "Collab Share example",
+   "t": 5,
+   "z": 6,
+   "jx": 0
+  },
+  {
+   "id": "car",
+   "type": "node",
+   "kind": "BEAM",
+   "x": -420,
+   "y": 318,
+   "by": "Collab Share example",
+   "t": 6,
+   "z": 7,
+   "bw": 220,
+   "bh": 20,
+   "color": "#ef4444"
+  },
+  {
+   "id": "wf",
+   "type": "node",
+   "kind": "WHEEL",
+   "x": -440,
+   "y": 308,
+   "by": "Collab Share example",
+   "t": 7,
+   "z": 8
+  },
+  {
+   "id": "wr",
+   "type": "node",
+   "kind": "WHEEL",
+   "x": -240,
+   "y": 308,
+   "by": "Collab Share example",
+   "t": 8,
+   "z": 9
+  },
+  {
+   "id": "cab",
+   "type": "node",
+   "kind": "STEEL",
+   "x": -380,
+   "y": 268,
+   "by": "Collab Share example",
+   "t": 9,
+   "z": 10,
+   "bw": 70,
+   "bh": 50,
+   "color": "#ef4444"
+  },
+  {
+   "id": "weld",
+   "type": "node",
+   "kind": "WELD",
+   "x": -356,
+   "y": 307,
+   "by": "Collab Share example",
+   "t": 10,
+   "z": 11
+  },
+  {
+   "id": "w-joy.0-wf.0",
+   "type": "wire",
+   "a": {
+    "n": "joy",
+    "p": 0
+   },
+   "b": {
+    "n": "wf",
+    "p": 0
+   },
+   "by": "Collab Share example",
+   "t": 11,
+   "z": 0
+  },
+  {
+   "id": "w-joy.0-wr.0",
+   "type": "wire",
+   "a": {
+    "n": "joy",
+    "p": 0
+   },
+   "b": {
+    "n": "wr",
+    "p": 0
+   },
+   "by": "Collab Share example",
+   "t": 12,
+   "z": 0
+  },
+  {
+   "id": "ball",
+   "type": "node",
+   "kind": "BALL",
+   "x": 0,
+   "y": 300,
+   "by": "Collab Share example",
+   "t": 13,
+   "z": 14,
+   "bw": 70,
+   "bh": 70
+  },
+  {
+   "id": "barrier",
+   "type": "node",
+   "kind": "DETECTOR",
+   "x": 220,
+   "y": 250,
+   "by": "Collab Share example",
+   "t": 14,
+   "z": 15,
+   "bw": 150,
+   "bh": 26,
+   "rot": 90
+  },
+  {
+   "id": "count",
+   "type": "node",
+   "kind": "SEG7",
+   "x": 300,
+   "y": 120,
+   "by": "Collab Share example",
+   "t": 15,
+   "z": 16
+  },
+  {
+   "id": "w-barrier.1-count.0",
+   "type": "wire",
+   "a": {
+    "n": "barrier",
+    "p": 1
+   },
+   "b": {
+    "n": "count",
+    "p": 0
+   },
+   "by": "Collab Share example",
+   "t": 16,
+   "z": 0
+  },
+  {
+   "id": "beacon",
+   "type": "node",
+   "kind": "BEACON",
+   "x": 380,
+   "y": 110,
+   "by": "Collab Share example",
+   "t": 17,
+   "z": 18
+  },
+  {
+   "id": "w-barrier.0-beacon.0",
+   "type": "wire",
+   "a": {
+    "n": "barrier",
+    "p": 0
+   },
+   "b": {
+    "n": "beacon",
+    "p": 0
+   },
+   "by": "Collab Share example",
+   "t": 18,
+   "z": 0
+  },
+  {
+   "id": "post",
+   "type": "node",
+   "kind": "BEDROCK",
+   "x": 900,
+   "y": 330,
+   "by": "Collab Share example",
+   "t": 19,
+   "z": 20,
+   "bw": 30,
+   "bh": 70
+  },
+  {
+   "id": "seesaw",
+   "type": "node",
+   "kind": "BEAM",
+   "x": 790,
+   "y": 312,
+   "by": "Collab Share example",
+   "t": 20,
+   "z": 21,
+   "bw": 250,
+   "bh": 16,
+   "color": "#facc15"
+  },
+  {
+   "id": "pivot",
+   "type": "node",
+   "kind": "AXLE",
+   "x": 904,
+   "y": 309,
+   "by": "Collab Share example",
+   "t": 21,
+   "z": 22
+  },
+  {
+   "id": "cw",
+   "type": "node",
+   "kind": "COUNTERWEIGHT",
+   "x": 1000,
+   "y": 250,
+   "by": "Collab Share example",
+   "t": 22,
+   "z": 23,
+   "bw": 36,
+   "bh": 36
+  },
+  {
+   "id": "hook",
+   "type": "node",
+   "kind": "BEDROCK",
+   "x": 1180,
+   "y": 40,
+   "by": "Collab Share example",
+   "t": 23,
+   "z": 24,
+   "bw": 60,
+   "bh": 20
+  },
+  {
+   "id": "rope",
+   "type": "node",
+   "kind": "ROPE",
+   "x": 1150,
+   "y": 120,
+   "by": "Collab Share example",
+   "t": 24,
+   "z": 25,
+   "bw": 160,
+   "bh": 10,
+   "rot": 60
+  },
+  {
+   "id": "bob",
+   "type": "node",
+   "kind": "BALL",
+   "x": 1245,
+   "y": 169,
+   "by": "Collab Share example",
+   "t": 25,
+   "z": 26,
+   "bw": 50,
+   "bh": 50,
+   "material": "steel",
+   "color": "#9ca3af"
+  },
+  {
+   "id": "runBelt",
+   "type": "node",
+   "kind": "LEVER",
+   "x": 1300,
+   "y": 160,
+   "by": "Collab Share example",
+   "t": 26,
+   "z": 27,
+   "value": false
+  },
+  {
+   "id": "belt",
+   "type": "node",
+   "kind": "CONVEYOR",
+   "x": 1300,
+   "y": 300,
+   "by": "Collab Share example",
+   "t": 27,
+   "z": 28,
+   "bw": 240,
+   "bh": 24
+  },
+  {
+   "id": "w-runBelt.0-belt.0",
+   "type": "wire",
+   "a": {
+    "n": "runBelt",
+    "p": 0
+   },
+   "b": {
+    "n": "belt",
+    "p": 0
+   },
+   "by": "Collab Share example",
+   "t": 28,
+   "z": 0
+  },
+  {
+   "id": "box",
+   "type": "node",
+   "kind": "STEEL",
+   "x": 1330,
+   "y": 230,
+   "by": "Collab Share example",
+   "t": 29,
+   "z": 30,
+   "bw": 50,
+   "bh": 50,
+   "color": "#3b82f6"
+  },
+  {
+   "id": "tramp",
+   "type": "node",
+   "kind": "TRAMPOLINE",
+   "x": 1600,
+   "y": 376,
+   "by": "Collab Share example",
+   "t": 30,
+   "z": 31,
+   "bw": 140,
+   "bh": 24
+  },
+  {
+   "id": "drop",
+   "type": "node",
+   "kind": "BALL",
+   "x": 1645,
+   "y": 120,
+   "by": "Collab Share example",
+   "t": 31,
+   "z": 32,
+   "bw": 44,
+   "bh": 44,
+   "color": "#22c55e"
+  }
+ ]
+}

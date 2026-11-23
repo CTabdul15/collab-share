@@ -127,6 +127,13 @@ export class WhiteboardPanel {
         { label: '$(folder-opened) Open a Sandbox file…', detail: 'A .board.json file you saved before.' },
         { label: 'Examples', kind: vscode.QuickPickItemKind.Separator },
         { label: '$(beaker) Fluid power: press sequence', detail: 'Pushbuttons, OR/AND, 5/2 valve, double-acting cylinder, limit switch, delay, pump.', file: 'press-sequence.board.json' },
+        { label: '$(rocket) Physics playground', detail: 'Drive a car with a joystick, push a ball through a light barrier, seesaw, pendulum, conveyor, trampoline.', file: 'physics-playground.board.json' },
+        { label: '$(debug-step-over) Marble run', detail: 'A ball rolls down slopes past a light barrier onto a trampoline; an area sensor sees it land.', file: 'marble-run.board.json' },
+        { label: '$(flame) Rocket cart', detail: 'A thruster on a cart with wheels; a speed sensor shows how fast it goes.', file: 'rocket-cart.board.json' },
+        { label: '$(package) Counting line', detail: 'A conveyor carries parts past a light barrier; the line stops by itself after 3.', file: 'counting-line.board.json' },
+        { label: '$(dashboard) Hydraulic press', detail: 'A cylinder presses on a force plate; panel meter in kN and a stack light.', file: 'hydraulic-press.board.json' },
+        { label: '$(pulse) PID control loop', detail: 'A PID controller makes a slow process follow a slider; oscilloscope and meter.', file: 'pid-control.board.json' },
+        { label: '$(symbol-numeric) Electronic dice', detail: 'Hold Roll: a randomizer picks 1 … 6 and a random RGB color.', file: 'electronic-dice.board.json' },
         { label: '$(lock) Pressure lockout', detail: 'Lever → pump → cylinder → limit sensor → 3/2 valve → two throttle check valves → gauge; over 80 bar locks the lever out and the gauge drains slowly.', file: 'pressure-lockout.board.json' },
         { label: '$(gear) Hydraulic jog: 4/3 valve', detail: 'Hold Extend / Retract; the cylinder stops and holds when you let go. Speed knob, gauge, end lamps.', file: 'hydraulic-jog.board.json' },
         { label: '$(circle-large-filled) Traffic light', detail: 'Clock + counter + compare modules switch red, red/yellow, green and yellow.', file: 'traffic-light.board.json' },
@@ -259,6 +266,7 @@ export function html(webview: vscode.Webview, extensionUri: vscode.Uri): string 
 </head>
 <body>
 <canvas id="c" tabindex="0"></canvas>
+<div id="physoff">⏸ Physics paused by the host</div>
 <div id="perf" title="Performance: VS Code extension host (this extension runs in it) and the whole device. Turn off with the setting collab.performanceOverlay."></div>
 <div id="bar" class="bar">
   ${tool('select', 'Select, move, resize (V)')}
@@ -306,6 +314,7 @@ export function html(webview: vscode.Webview, extensionUri: vscode.Uri): string 
       <button id="open" title="Open an example or a saved Sandbox file">${ICONS.open}<span>Open / examples</span></button>
       <button id="clear" title="Clear the whole board">${ICONS.clear}<span>Clear</span></button>
       <div id="bgpick" title="Background for everyone (host only)"><span class="poplabel">Background</span><button class="bgsw" data-bg="blue" title="Blueprint blue"></button><button class="bgsw" data-bg="black" title="Black"></button><button class="bgsw" data-bg="gray" title="Gray"></button><button class="bgsw" data-bg="green" title="Green"></button><input id="bgcustom" type="color" value="#123f7a" title="Custom background color"></div>
+      <button id="physbtn" title="Physics on/off for everyone (host only)"><span>⚛</span><span id="physlabel">Physics: on</span></button>
     </div></span>
 </div>
 <div id="selbar" class="bar">
@@ -329,7 +338,10 @@ export function html(webview: vscode.Webview, extensionUri: vscode.Uri): string 
 </div>
 <div id="hint">Drag from a node's pin to another pin to wire it · hold a Push Button, click a Lever or Switch · click the ⚙ gear on a module to change its settings (clock speed, delay, pitch…) · double-click text or notes to edit · drag the round handle to rotate · scroll to zoom, right-drag to pan</div>
 <script nonce="${nonce}" src="${media('circuit.js')}"></script>
+<script nonce="${nonce}" src="${media('physics.js')}"></script>
+<script nonce="${nonce}" src="${media('parts.js')}"></script>
 <script nonce="${nonce}" src="${media('catalog.js')}"></script>
+<script nonce="${nonce}" src="${media('parts-draw.js')}"></script>
 <script nonce="${nonce}" src="${media('whiteboard.js')}"></script>
 </body>
 </html>`;

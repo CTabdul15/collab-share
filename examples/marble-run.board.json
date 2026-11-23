@@ -1,0 +1,208 @@
+{
+ "format": "collab-share-whiteboard",
+ "version": 1,
+ "saved": "2026-11-21T12:00:00.000Z",
+ "shapes": [
+  {
+   "id": "readme",
+   "type": "note",
+   "x": -420,
+   "y": -320,
+   "w": 340,
+   "h": 200,
+   "text": "Marble run: the ball rolls down two slopes, past a light barrier (counts and flashes the beacon) and drops onto a trampoline. The area sensor at the bottom lights the green lamp when it arrives. Move the slopes or add bumpers and try again (Ctrl+Z puts the ball back).",
+   "color": "#ffd166",
+   "by": "Collab Share example",
+   "t": 1,
+   "z": 2
+  },
+  {
+   "id": "ball",
+   "type": "node",
+   "kind": "BALL",
+   "x": 0,
+   "y": -40,
+   "by": "Collab Share example",
+   "t": 2,
+   "z": 3,
+   "bw": 40,
+   "bh": 40,
+   "color": "#f97316"
+  },
+  {
+   "id": "slope1",
+   "type": "node",
+   "kind": "BEDROCK",
+   "x": -40,
+   "y": 100,
+   "by": "Collab Share example",
+   "t": 3,
+   "z": 4,
+   "bw": 380,
+   "bh": 20,
+   "rot": 12
+  },
+  {
+   "id": "slope2",
+   "type": "node",
+   "kind": "BEDROCK",
+   "x": 200,
+   "y": 300,
+   "by": "Collab Share example",
+   "t": 4,
+   "z": 5,
+   "bw": 380,
+   "bh": 20,
+   "rot": 348
+  },
+  {
+   "id": "stop",
+   "type": "node",
+   "kind": "BUMPER",
+   "x": 560,
+   "y": 210,
+   "by": "Collab Share example",
+   "t": 5,
+   "z": 6,
+   "bw": 40,
+   "bh": 40
+  },
+  {
+   "id": "wall",
+   "type": "node",
+   "kind": "BEDROCK",
+   "x": 620,
+   "y": -60,
+   "by": "Collab Share example",
+   "t": 6,
+   "z": 7,
+   "bw": 40,
+   "bh": 640
+  },
+  {
+   "id": "floor",
+   "type": "node",
+   "kind": "BEDROCK",
+   "x": -200,
+   "y": 560,
+   "by": "Collab Share example",
+   "t": 7,
+   "z": 8,
+   "bw": 900,
+   "bh": 40
+  },
+  {
+   "id": "tramp",
+   "type": "node",
+   "kind": "TRAMPOLINE",
+   "x": 60,
+   "y": 536,
+   "by": "Collab Share example",
+   "t": 8,
+   "z": 9,
+   "bw": 160,
+   "bh": 24
+  },
+  {
+   "id": "gate",
+   "type": "node",
+   "kind": "DETECTOR",
+   "x": 380,
+   "y": 230,
+   "by": "Collab Share example",
+   "t": 9,
+   "z": 10,
+   "bw": 140,
+   "bh": 26,
+   "rot": 90
+  },
+  {
+   "id": "beacon",
+   "type": "node",
+   "kind": "BEACON",
+   "x": 700,
+   "y": 140,
+   "by": "Collab Share example",
+   "t": 10,
+   "z": 11
+  },
+  {
+   "id": "w-gate.0-beacon.0",
+   "type": "wire",
+   "a": {
+    "n": "gate",
+    "p": 0
+   },
+   "b": {
+    "n": "beacon",
+    "p": 0
+   },
+   "by": "Collab Share example",
+   "t": 11,
+   "z": 0
+  },
+  {
+   "id": "hits",
+   "type": "node",
+   "kind": "SEG7",
+   "x": 700,
+   "y": 0,
+   "by": "Collab Share example",
+   "t": 12,
+   "z": 13
+  },
+  {
+   "id": "w-gate.1-hits.0",
+   "type": "wire",
+   "a": {
+    "n": "gate",
+    "p": 1
+   },
+   "b": {
+    "n": "hits",
+    "p": 0
+   },
+   "by": "Collab Share example",
+   "t": 13,
+   "z": 0
+  },
+  {
+   "id": "landing",
+   "type": "node",
+   "kind": "ZONE",
+   "x": -200,
+   "y": 440,
+   "by": "Collab Share example",
+   "t": 14,
+   "z": 15,
+   "bw": 900,
+   "bh": 120
+  },
+  {
+   "id": "done",
+   "type": "node",
+   "kind": "LAMP",
+   "x": 720,
+   "y": 300,
+   "by": "Collab Share example",
+   "t": 15,
+   "z": 16,
+   "color": "#22c55e"
+  },
+  {
+   "id": "w-landing.0-done.0",
+   "type": "wire",
+   "a": {
+    "n": "landing",
+    "p": 0
+   },
+   "b": {
+    "n": "done",
+    "p": 0
+   },
+   "by": "Collab Share example",
+   "t": 16,
+   "z": 0
+  }
+ ]
+}

@@ -1,0 +1,302 @@
+{
+ "format": "collab-share-whiteboard",
+ "version": 1,
+ "saved": "2026-11-21T12:00:00.000Z",
+ "shapes": [
+  {
+   "id": "readme",
+   "type": "note",
+   "x": -460,
+   "y": -320,
+   "w": 360,
+   "h": 200,
+   "text": "Counting line: turn RUN on. The belt carries the steel parts to the end, where they fall past a light barrier that counts them. After 3 parts the line stops by itself and the stack light turns green. Reset by turning RUN off and on (or move the parts back).",
+   "color": "#ffd166",
+   "by": "Collab Share example",
+   "t": 1,
+   "z": 2
+  },
+  {
+   "id": "run",
+   "type": "node",
+   "kind": "LEVER",
+   "x": -460,
+   "y": 40,
+   "by": "Collab Share example",
+   "t": 2,
+   "z": 3,
+   "value": false
+  },
+  {
+   "id": "belt",
+   "type": "node",
+   "kind": "CONVEYOR",
+   "x": -200,
+   "y": 300,
+   "by": "Collab Share example",
+   "t": 3,
+   "z": 4,
+   "bw": 420,
+   "bh": 24
+  },
+  {
+   "id": "p1",
+   "type": "node",
+   "kind": "STEEL",
+   "x": -180,
+   "y": 250,
+   "by": "Collab Share example",
+   "t": 4,
+   "z": 5,
+   "bw": 44,
+   "bh": 44,
+   "color": "#ef4444"
+  },
+  {
+   "id": "p2",
+   "type": "node",
+   "kind": "STEEL",
+   "x": -100,
+   "y": 250,
+   "by": "Collab Share example",
+   "t": 5,
+   "z": 6,
+   "bw": 44,
+   "bh": 44,
+   "color": "#facc15"
+  },
+  {
+   "id": "p3",
+   "type": "node",
+   "kind": "STEEL",
+   "x": -20,
+   "y": 250,
+   "by": "Collab Share example",
+   "t": 6,
+   "z": 7,
+   "bw": 44,
+   "bh": 44,
+   "color": "#22c55e"
+  },
+  {
+   "id": "floor",
+   "type": "node",
+   "kind": "BEDROCK",
+   "x": -300,
+   "y": 480,
+   "by": "Collab Share example",
+   "t": 7,
+   "z": 8,
+   "bw": 900,
+   "bh": 40
+  },
+  {
+   "id": "gate",
+   "type": "node",
+   "kind": "DETECTOR",
+   "x": 240,
+   "y": 330,
+   "by": "Collab Share example",
+   "t": 8,
+   "z": 9,
+   "bw": 140,
+   "bh": 26
+  },
+  {
+   "id": "three",
+   "type": "node",
+   "kind": "NUMBER",
+   "x": -200,
+   "y": 520,
+   "by": "Collab Share example",
+   "t": 9,
+   "z": 10,
+   "value": 3
+  },
+  {
+   "id": "enough",
+   "type": "node",
+   "kind": "LT",
+   "x": 60,
+   "y": 520,
+   "by": "Collab Share example",
+   "t": 10,
+   "z": 11
+  },
+  {
+   "id": "w-gate.1-enough.0",
+   "type": "wire",
+   "a": {
+    "n": "gate",
+    "p": 1
+   },
+   "b": {
+    "n": "enough",
+    "p": 0
+   },
+   "by": "Collab Share example",
+   "t": 11,
+   "z": 0
+  },
+  {
+   "id": "w-three.0-enough.1",
+   "type": "wire",
+   "a": {
+    "n": "three",
+    "p": 0
+   },
+   "b": {
+    "n": "enough",
+    "p": 1
+   },
+   "by": "Collab Share example",
+   "t": 12,
+   "z": 0
+  },
+  {
+   "id": "go",
+   "type": "node",
+   "kind": "AND",
+   "x": -200,
+   "y": 120,
+   "by": "Collab Share example",
+   "t": 13,
+   "z": 14
+  },
+  {
+   "id": "w-run.0-go.0",
+   "type": "wire",
+   "a": {
+    "n": "run",
+    "p": 0
+   },
+   "b": {
+    "n": "go",
+    "p": 0
+   },
+   "by": "Collab Share example",
+   "t": 14,
+   "z": 0
+  },
+  {
+   "id": "w-enough.0-go.1",
+   "type": "wire",
+   "a": {
+    "n": "enough",
+    "p": 0
+   },
+   "b": {
+    "n": "go",
+    "p": 1
+   },
+   "by": "Collab Share example",
+   "t": 15,
+   "z": 0
+  },
+  {
+   "id": "w-go.0-belt.0",
+   "type": "wire",
+   "a": {
+    "n": "go",
+    "p": 0
+   },
+   "b": {
+    "n": "belt",
+    "p": 0
+   },
+   "by": "Collab Share example",
+   "t": 16,
+   "z": 0
+  },
+  {
+   "id": "count",
+   "type": "node",
+   "kind": "SEG7",
+   "x": 420,
+   "y": 120,
+   "by": "Collab Share example",
+   "t": 17,
+   "z": 18
+  },
+  {
+   "id": "w-gate.1-count.0",
+   "type": "wire",
+   "a": {
+    "n": "gate",
+    "p": 1
+   },
+   "b": {
+    "n": "count",
+    "p": 0
+   },
+   "by": "Collab Share example",
+   "t": 18,
+   "z": 0
+  },
+  {
+   "id": "light",
+   "type": "node",
+   "kind": "STACKLIGHT",
+   "x": 540,
+   "y": 100,
+   "by": "Collab Share example",
+   "t": 19,
+   "z": 20
+  },
+  {
+   "id": "full",
+   "type": "node",
+   "kind": "NOT",
+   "x": 420,
+   "y": 300,
+   "by": "Collab Share example",
+   "t": 20,
+   "z": 21
+  },
+  {
+   "id": "w-enough.0-full.0",
+   "type": "wire",
+   "a": {
+    "n": "enough",
+    "p": 0
+   },
+   "b": {
+    "n": "full",
+    "p": 0
+   },
+   "by": "Collab Share example",
+   "t": 21,
+   "z": 0
+  },
+  {
+   "id": "w-full.0-light.2",
+   "type": "wire",
+   "a": {
+    "n": "full",
+    "p": 0
+   },
+   "b": {
+    "n": "light",
+    "p": 2
+   },
+   "by": "Collab Share example",
+   "t": 22,
+   "z": 0
+  },
+  {
+   "id": "w-go.0-light.1",
+   "type": "wire",
+   "a": {
+    "n": "go",
+    "p": 0
+   },
+   "b": {
+    "n": "light",
+    "p": 1
+   },
+   "by": "Collab Share example",
+   "t": 23,
+   "z": 0
+  }
+ ]
+}

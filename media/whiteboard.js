@@ -63,13 +63,27 @@
   function wirePoints(w) {
     const A = byId.get(w.a.n), B = byId.get(w.b.n);
     if (!A || !B) return null;
-    return { a: pinPos(A, 'out', w.a.p), b: pinPos(B, 'in', w.b.p), ba: worldBox(A), bb: worldBox(B), skip: [A.id, B.id] };
+    const moving = poseNow.has(A.id) || poseNow.has(B.id); // cables to moving parts: a loose curve
+    return { a: pinPos(A, 'out', w.a.p), b: pinPos(B, 'in', w.b.p), ba: moving ? null : worldBox(A), bb: moving ? null : worldBox(B), skip: [A.id, B.id], moving };
   }
+  // ------------------------------------------------------------------ physics poses (from the host's simulation, 20 per second, smoothed)
+  let posePrev = new Map(), poseCur = new Map(), poseT = 0, poseNow = new Map(), springEnds = new Map();
+  function updatePoses() {
+    const k = Math.max(0, Math.min(1, (performance.now() - poseT) / 50));
+    poseNow = new Map();
+    for (const [id, q] of poseCur) {
+      const p = posePrev.get(id) || q;
+      let da = q[2] - p[2]; while (da > Math.PI) da -= 2 * Math.PI; while (da < -Math.PI) da += 2 * Math.PI;
+      poseNow.set(id, { x: p[0] + (q[0] - p[0]) * k, y: p[1] + (q[1] - p[1]) * k, a: p[2] + da * k });
+    }
+  }
+  CC.setPoseProvider((n) => poseNow.get(n.id) || null);
   // Wire style: curved or square (right angles with rounded corners). A per-person view setting.
   let wireStyle = 'curve';
   try { wireStyle = localStorage.getItem('collab.wireStyle') || 'curve'; } catch { /* ignore */ }
   let routeCache = new Map(), routeVersion = 0, routeCacheVersion = -1;
   function wirePath(a, b, ba, bb, skip) {
+    if (!ba && !bb && skip) return bezier(a, b); // to or from a moving part
     if (routeCacheVersion !== routeVersion) { routeCache = new Map(); routeCacheVersion = routeVersion; }
     const key = [wireStyle, a.x, a.y, a.dx, a.dy, b.x, b.y, b.dx, b.dy, skip && skip.join()].join('|');
     let r = routeCache.get(key);
@@ -346,7 +360,7 @@
     if ('x1' in c) { c.x1 = mx(c.x1); c.x2 = mx(c.x2); c.y1 = my(c.y1); c.y2 = my(c.y2); }
     if (c.type === 'text') { c.x = mx(c.x); c.y = my(c.y); c.size = Math.max(6, c.size * sy); }
     if (c.type === 'note') { c.x = b1.x1; c.y = b1.y1; c.w = Math.max(40, b1.x2 - b1.x1); c.h = Math.max(30, b1.y2 - b1.y1); }
-    if (c.type === 'node') { c.x = b1.x1; c.y = b1.y1; c.bw = Math.max(20, Math.round(b1.x2 - b1.x1)); c.bh = Math.max(20, Math.round(b1.y2 - b1.y1)); delete c.home; }
+    if (c.type === 'node') { c.x = b1.x1; c.y = b1.y1; c.bw = Math.max(16, Math.round(b1.x2 - b1.x1)); c.bh = Math.max(8, Math.round(b1.y2 - b1.y1)); if ((def(c.kind) || {}).square) c.bw = c.bh = Math.max(c.bw, c.bh); delete c.home; }
     return c;
   }
   const resizable = (s) => s && (s.type === 'node' ? !!(def(s.kind) || {}).resizable : s.type !== 'wire');
@@ -457,7 +471,13 @@
   }
 
   function drawShape(c, s) {
-    if (s.type === 'node' && (s.kind === 'STEEL' || s.kind === 'BEDROCK')) { drawBlock(c, s); return; }
+    if (s.type === 'node' && (s.kind === 'SPRING' || s.kind === 'ROPE')) { drawSpringPart(c, s); return; }
+    const pose = s.type === 'node' ? poseNow.get(s.id) : null;
+    if (pose) {
+      const sz = CC.sizeOf(s);
+      c.save(); c.translate(pose.x, pose.y); c.rotate(pose.a); c.translate(-(s.x + sz.w / 2), -(s.y + sz.h / 2));
+      drawShapeInner(c, s); c.restore(); return;
+    }
     inFrame(c, s, () => drawShapeInner(c, s));
   }
   function drawShapeInner(c, s) {
@@ -735,7 +755,24 @@
   const props = document.getElementById('props');
   let propsFor = null;
   function closeProps() { if (props) props.style.display = 'none'; propsFor = null; liveBox = null; }
-  const INSPECT = new Set(['STEEL', 'BEDROCK', 'DISPLAY', 'NOTE', 'BUZZER', 'BUTTON', 'LIMIT', 'PUMP', 'GAUGE', 'FLOW', 'FLOW_1W', 'POT', 'VALVE', 'VALVE_3_2', 'VALVE_5_2', 'VALVE_4_3', 'CYLINDER', 'CYL_DA']);
+  const MATERIAL_OPTS = Object.keys(window.CollabPhysics.MATERIALS).map((k) => [k, k[0].toUpperCase() + k.slice(1)]);
+  /** Gear settings of the extra parts: [key, label, number range or options, default]. */
+  const PART_SETTINGS = {
+    BEAM: [['material', 'Material', MATERIAL_OPTS, 'aluminium']], BALL: [['material', 'Material', MATERIAL_OPTS, 'rubber']],
+    COUNTERWEIGHT: [['material', 'Material', MATERIAL_OPTS, 'lead']], WHEEL: [['torque', 'Motor torque', [1e5, 2e7], 2e6], ['material', 'Tire', MATERIAL_OPTS, 'rubber']],
+    RAMP: [['loose', 'Ramp', [['', 'Fixed'], ['1', 'Loose (can be pushed)']], '']],
+    SPRING: [['value', 'Stiffness', [10, 20000], 400]], THRUSTER: [['value', 'Max force (N)', [1, 100000], 400]], MAGNET: [['value', 'Strength', [10, 5000], 600]],
+    NEWTON: [['value', 'Over at (N)', [0, 1e6], 100]], PRESSURE_SW: [['value', 'Switch at (bar)', [0, 1000], 50]], RELIEF: [['value', 'Max pressure (bar)', [0, 1000], 60]],
+    ACCUMULATOR: [['value', 'Capacity (bar)', [1, 1000], 120]], HYDMOTOR: [['value', 'rpm per bar', [0.1, 1000], 10]], NOZZLE: [['value', 'Jet strength', [0.1, 10], 1]],
+    RANDOM: [['value', 'Max number', [1, 1e6], 100]], TON: [['value', 'Delay (s)', [0.05, 3600], 1]], TOF: [['value', 'Delay (s)', [0.05, 3600], 1]],
+    PWM: [['value', 'Period (s)', [0.1, 60], 1]], SCHMITT: [['value', 'High level', [-1e6, 1e6], 60], ['low', 'Low level', [-1e6, 1e6], 40]],
+    LOWPASS: [['value', 'Time constant (s)', [0.05, 60], 0.5]], RATELIMIT: [['value', 'Rate per second', [0.01, 1e6], 10]],
+    PID: [['kp', 'Kp', [-1e4, 1e4], 1], ['ki', 'Ki', [-1e4, 1e4], 0.2], ['kd', 'Kd', [-1e4, 1e4], 0], ['lim', 'Output limit', [0, 1e6], 100]],
+    SLIDER: [['max', 'Max', [1, 1e6], 100]], BARGRAPH: [['value', 'Full scale', [0.01, 1e6], 10]], METER: [['value', 'Full scale', [0.01, 1e6], 100]],
+    SCOPE: [['value', 'Full screen =', [0.01, 1e6], 10]], BATTERY: [['value', 'Voltage', [0, 1000], 24]],
+  };
+  const RESETTABLE = new Set(['DETECTOR', 'COUNTER', 'SHIFT', 'REGISTER', 'INTEGRATOR', 'PID', 'SAMPLEHOLD', 'ACCUMULATOR', 'RANDOM', 'LOWPASS', 'RATELIMIT', 'SR', 'DFF', 'TFF', 'JKFF', 'DLATCH', 'TON', 'TOF', 'SCHMITT']);
+  const INSPECT = new Set([...Object.keys(PART_SETTINGS), ...RESETTABLE, 'STEEL', 'BEDROCK', 'DISPLAY', 'NOTE', 'BUZZER', 'BUTTON', 'LIMIT', 'PUMP', 'GAUGE', 'FLOW', 'FLOW_1W', 'POT', 'VALVE', 'VALVE_3_2', 'VALVE_5_2', 'VALVE_4_3', 'CYLINDER', 'CYL_DA']);
   let liveBox = null;
   /** Live values in the open inspector (refreshed while drawing). */
   function updateLive() {
@@ -784,8 +821,20 @@
       el.onchange = () => { const v = parse(); if (v !== null) { const c = Math.min(max, Math.max(min, v)); update({ [key]: c }, true, orig); el.value = String(c); orig = clone(byId.get(n.id) || n); } };
       return el;
     };
+    if (RESETTABLE.has(n.kind) && !readOnly) {
+      const rb = document.createElement('button'); rb.textContent = '↺ Reset (counter / memory)'; rb.style.width = '100%'; rb.style.margin = '2px 0 6px';
+      rb.onclick = () => { const cur = byId.get(n.id); if (cur) commit([{ ...clone(cur), resetAt: Date.now() }]); };
+      props.append(rb);
+    }
+    if (PART_SETTINGS[n.kind]) {
+      for (const [key, lab, spec, dflt] of PART_SETTINGS[n.kind]) {
+        if (Array.isArray(spec[0])) { const sel = row(lab, select(spec, String(n[key] ?? dflt))); sel.onchange = () => update({ [key]: sel.value === '' ? undefined : sel.value }); }
+        else numberRow(lab, n[key], dflt, spec[0], spec[1], key);
+      }
+    }
     if (n.kind === 'STEEL' || n.kind === 'BEDROCK') {
       const sz = CC.sizeOf(n);
+      if (n.kind === 'STEEL') { const mat = row('Material', select(MATERIAL_OPTS, n.material || 'steel')); mat.onchange = () => update({ material: mat.value }); }
       numberRow('Width', sz.w, 80, 20, 2000, 'bw');
       numberRow('Height', sz.h, 80, 20, 2000, 'bh');
       if (n.kind === 'STEEL') {
@@ -885,6 +934,8 @@
   }
   function animating() {
     const now = performance.now();
+    if (partsAnim) { partsAnim = false; return true; }
+    if (poseCur.size && now - poseT < 150) return true;
     for (const n of shapes) {
       if (n.type !== 'node') continue;
       if (n.kind === 'MOTOR' && motorSpeed(n) !== 0) return true;
@@ -926,15 +977,18 @@
     c.save();
     c.shadowColor = 'rgba(0,0,0,.45)'; c.shadowBlur = 12; c.shadowOffsetY = 4;
     roundRect(c, n.x, n.y, d.w, d.h, 9);
-    const bg = c.createLinearGradient(0, n.y, 0, n.y + d.h); bg.addColorStop(0, '#16305a'); bg.addColorStop(1, '#0a1a33');
+    const bg = c.createLinearGradient(0, n.y, 0, n.y + d.h); bg.addColorStop(0, '#11663f'); bg.addColorStop(1, '#093820');
     c.fillStyle = bg; c.fill();
     c.restore();
     c.save(); roundRect(c, n.x, n.y, d.w, d.h, 9); c.clip();
-    const hg = c.createLinearGradient(0, n.y, 0, n.y + 26); hg.addColorStop(0, shade(accent, 0.25)); hg.addColorStop(1, shade(accent, -0.15));
+    const hg = c.createLinearGradient(0, n.y, 0, n.y + 26); hg.addColorStop(0, '#0d5232'); hg.addColorStop(1, '#083620');
     c.fillStyle = hg; c.fillRect(n.x, n.y, d.w, 26);
+    c.fillStyle = accent; c.fillRect(n.x, n.y + 23, d.w, 3); // category stripe
+    c.strokeStyle = 'rgba(170,240,190,.10)'; c.lineWidth = 1; // copper traces
+    for (let k = 0; k < 3; k++) { const yy = n.y + 34 + k * 14; if (yy > n.y + d.h - 6) break; c.beginPath(); c.moveTo(n.x + d.w * 0.35, yy); c.lineTo(n.x + d.w * 0.55, yy); c.lineTo(n.x + d.w * 0.62, yy + 6); c.stroke(); }
     c.fillStyle = 'rgba(255,255,255,.18)'; c.fillRect(n.x, n.y, d.w, 1.5);
     c.restore();
-    roundRect(c, n.x, n.y, d.w, d.h, 9); c.strokeStyle = color === '#ffffff' ? 'rgba(255,255,255,.55)' : color; c.lineWidth = 1.5; c.stroke();
+    roundRect(c, n.x, n.y, d.w, d.h, 9); c.strokeStyle = color === '#ffffff' ? '#c9a227' : color; c.lineWidth = 1.5; c.stroke();
     c.beginPath(); c.moveTo(n.x, n.y + 26); c.lineTo(n.x + d.w, n.y + 26); c.strokeStyle = 'rgba(0,0,0,.35)'; c.stroke();
     // icon chip + title
     const ic = (ICON[d.cat] || '').trim();
@@ -1004,7 +1058,10 @@
     c.fillStyle = col; c.fill();
   }
   function frame(c, n, d, title) {
-    c.save(); c.setLineDash([3, 4]); roundRect(c, n.x, n.y, d.w, d.h, 6); c.strokeStyle = 'rgba(255,255,255,.16)'; c.lineWidth = 1; c.stroke(); c.restore();
+    const hyd = d.cat === 'hyd';
+    c.save(); roundRect(c, n.x, n.y, d.w, d.h, 6);
+    if (hyd) { c.fillStyle = 'rgba(245,190,60,.05)'; c.fill(); }
+    c.setLineDash([3, 4]); c.strokeStyle = hyd ? 'rgba(245,190,60,.45)' : 'rgba(255,255,255,.16)'; c.lineWidth = 1; c.stroke(); c.restore();
     if (title) tag(c, title, n.x + 5, n.y + 8, 'left', 'rgba(255,255,255,.62)', 9);
   }
   /** Spring symbol between x1 and x2 around y. */
@@ -1589,7 +1646,34 @@
     if (n.kind === 'STEEL' || n.kind === 'BEDROCK') inFrame(c, n, () => { const gp = gearPos(n); drawGear(c, gp.x, gp.y, hoverGear === n.id || propsFor === n.id); });
   }
 
+  // ------------------------------------------------------------------ extra parts (media/parts-draw.js)
+  let PD = null, partsAnim = false;
+  const partsDraw = () => PD || (PD = window.CollabPartsDraw({ tag, roundRect, ON, LINE, DIM, HYD_ON, FONT, truthy, num: CC.num, pinPos, shade, fmt, frame, wantFrames: () => { partsAnim = true; } }));
+  function drawSpringPart(c, n) {
+    const sz = CC.sizeOf(n), e = springEnds.get(n.id);
+    let ax, ay, bx, by;
+    if (e) [ax, ay, bx, by] = e;
+    else { const cx = n.x + sz.w / 2, cy = n.y + sz.h / 2, a = ((n.rot || 0) * Math.PI) / 180, dx = (Math.cos(a) * sz.w) / 2, dy = (Math.sin(a) * sz.w) / 2; ax = cx - dx; ay = cy - dy; bx = cx + dx; by = cy + dy; }
+    const L = Math.hypot(bx - ax, by - ay) || 1, ux = (bx - ax) / L, uy = (by - ay) / L, nx = -uy, ny = ux;
+    c.save(); c.lineCap = 'round'; c.lineJoin = 'round';
+    if (n.kind === 'ROPE') {
+      const slack = Math.max(0, sz.w - L) * 0.45, mx = (ax + bx) / 2, my = (ay + by) / 2 + slack;
+      c.beginPath(); c.moveTo(ax, ay); c.quadraticCurveTo(mx, my, bx, by); c.strokeStyle = '#a16207'; c.lineWidth = 3; c.stroke();
+      c.setLineDash([2, 3]); c.strokeStyle = '#fde68a'; c.lineWidth = 1; c.stroke(); c.setLineDash([]);
+    } else {
+      const turns = 10, amp = 7;
+      c.beginPath(); c.moveTo(ax, ay);
+      for (let k = 1; k < turns * 2; k++) { const t = k / (turns * 2), side = k % 2 ? amp : -amp; c.lineTo(ax + ux * L * t + nx * side, ay + uy * L * t + ny * side); }
+      c.lineTo(bx, by); c.strokeStyle = n.color && n.color !== '#ffffff' ? n.color : '#cbd5e1'; c.lineWidth = 2.2; c.stroke();
+    }
+    for (const [x, y] of [[ax, ay], [bx, by]]) { c.beginPath(); c.arc(x, y, 4, 0, Math.PI * 2); c.fillStyle = '#374151'; c.fill(); c.strokeStyle = '#e5e7eb'; c.lineWidth = 1.2; c.stroke(); }
+    c.restore();
+    inFrame(c, n, () => { const gp = gearPos(n); drawGear(c, gp.x, gp.y, hoverGear === n.id || propsFor === n.id); });
+  }
+
   function drawFluid(c, n, d, ins, out, mem) {
+    const pd = partsDraw()[n.kind];
+    if (pd) { pd(c, n, d, ins, out, mem); return; }
     if (d.valve) drawValve(c, n, d, mem, ins, out);
     else if (n.kind === 'CYLINDER' || n.kind === 'CYL_DA') drawCylinder(c, n, d, mem, ins, out);
     else if (n.kind === 'LIMIT') drawLimit(c, n, d, out);
@@ -1655,11 +1739,11 @@
       c.shadowColor = on ? 'rgba(255,49,49,.55)' : 'rgba(0,0,0,.45)'; c.shadowBlur = on ? 14 : 10; c.shadowOffsetY = on ? 0 : 3;
       gatePath(c, n.kind, n.x, n.y, d.w, d.h);
       const gg = c.createLinearGradient(0, n.y, 0, n.y + d.h);
-      if (on) { gg.addColorStop(0, '#7a1d24'); gg.addColorStop(1, '#3d0d12'); } else { gg.addColorStop(0, '#1d3a66'); gg.addColorStop(1, '#0b1b34'); }
+      if (on) { gg.addColorStop(0, '#7a1d24'); gg.addColorStop(1, '#3d0d12'); } else { gg.addColorStop(0, '#13703f'); gg.addColorStop(1, '#083a21'); }
       c.fillStyle = gg; c.fill();
       c.restore();
       gatePath(c, n.kind, n.x, n.y, d.w, d.h);
-      c.strokeStyle = on ? '#ff8a8a' : color === '#ffffff' ? '#e8eef6' : color; c.lineWidth = 2; c.stroke();
+      c.strokeStyle = on ? '#ff8a8a' : color === '#ffffff' ? '#d4af37' : color; c.lineWidth = 2; c.stroke();
       c.save(); gatePath(c, n.kind, n.x, n.y, d.w, d.h); c.clip(); c.fillStyle = 'rgba(255,255,255,.10)'; c.fillRect(n.x, n.y, d.w, d.h * 0.38); c.restore();
       if (/^XN?OR/.test(n.kind)) { c.beginPath(); c.moveTo(n.x + 2, n.y); c.quadraticCurveTo(n.x + 16, n.y + d.h / 2, n.x + 2, n.y + d.h); c.stroke(); }
       const bodyW = d.w - 14;
@@ -1801,6 +1885,7 @@
   function draw() {
     const _t0 = performance.now();
     evaluate();
+    updatePoses();
     const w = cv.width, h = cv.height;
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     grid(ctx, w, h, view.x * dpr, view.y * dpr, view.z);
@@ -1933,6 +2018,10 @@
   let isHost = true, perfOn = true;
   /** Host only: background choice for everyone (stored in the board's "meta" entry). */
   function syncBg() {
+    const physOn = !(boardMeta && boardMeta.physics === false);
+    const pb = document.getElementById('physbtn');
+    if (pb) { pb.style.display = isHost && !readOnly ? '' : 'none'; pb.classList.toggle('on', physOn); document.getElementById('physlabel').textContent = 'Physics: ' + (physOn ? 'on' : 'off'); }
+    const po = document.getElementById('physoff'); if (po) po.style.display = physOn ? 'none' : 'block';
     const pick = document.getElementById('bgpick');
     if (!pick) return;
     pick.style.display = isHost && !readOnly ? 'flex' : 'none';
@@ -1942,6 +2031,11 @@
     const cur = (boardMeta && boardMeta.bg) || 'blue';
     for (const b of pick.querySelectorAll('[data-bg]')) b.classList.toggle('on', b.dataset.bg === cur);
   }
+  document.getElementById('physbtn')?.addEventListener('click', () => {
+    if (!isHost || readOnly) return;
+    const on = !(boardMeta && boardMeta.physics === false);
+    commit([{ ...(boardMeta || {}), id: '__board', type: 'meta', physics: !on }]);
+  });
   document.getElementById('bgcustom')?.addEventListener('input', (e) => {
     if (!isHost || readOnly) return;
     commit([{ ...(boardMeta || {}), id: '__board', type: 'meta', bg: 'custom', bgColor: e.target.value }], [], false);
@@ -2149,7 +2243,7 @@
     const b = e.target.closest('button');
     if (!b || b.disabled) return;
     if (b.dataset.pop) { const p = document.getElementById('pop-' + b.dataset.pop); const open = !p.classList.contains('open'); closePops(); p.classList.toggle('open', open); return; }
-    if (b.closest('.pop') && !b.closest('#bgpick')) setTimeout(() => closePops(), 0);
+    if (b.closest('.pop') && !b.closest('#bgpick') && b.id !== 'physbtn') setTimeout(() => closePops(), 0);
     if (b.dataset.tool === 'nodes') { nodesMenu.classList.toggle('open'); if (nodesMenu.classList.contains('open')) { buildInventory(''); setTimeout(() => nodesMenu.querySelector('.inv-search')?.focus(), 0); } syncBar(); return; }
     if (b.dataset.tool) setTool(b.dataset.tool);
     if (b.dataset.color) restyle({ color: b.dataset.color });
@@ -2236,6 +2330,25 @@
     for (let i = shapes.length - 1; i >= 0; i--) if (shapes[i].type === 'node' && hit(shapes[i], p)) return shapes[i];
     for (let i = shapes.length - 1; i >= 0; i--) if (shapes[i].type !== 'node' && hit(shapes[i], p)) return shapes[i];
     return null;
+  }
+  /** A slider or joystick handle under the pointer. */
+  function ctlAt(p) {
+    for (let i = shapes.length - 1; i >= 0; i--) {
+      const s = shapes[i];
+      if (s.type !== 'node' || (s.kind !== 'SLIDER' && s.kind !== 'JOYSTICK')) continue;
+      const q = local(s, p), sz = CC.sizeOf(s);
+      if (s.kind === 'SLIDER' && q.x > s.x + 8 && q.x < s.x + sz.w - 8 && q.y > s.y + 16 && q.y < s.y + sz.h - 4) return s;
+      if (s.kind === 'JOYSTICK' && Math.hypot(q.x - (s.x + sz.w / 2), q.y - (s.y + sz.h / 2 + 5)) < 36) return s;
+    }
+    return null;
+  }
+  function ctlDrag(d, p) {
+    const s = d.s, q = local(s, p), sz = CC.sizeOf(s), cur = clone(byId.get(s.id) || s);
+    if (s.kind === 'SLIDER') { const max = Number(s.max ?? 100), x0 = s.x + 16, x1 = s.x + sz.w - 16; cur.value = Math.round(Math.max(0, Math.min(1, (q.x - x0) / (x1 - x0))) * max * 10) / 10; }
+    else { let jx = (q.x - (s.x + sz.w / 2)) / 24, jy = (q.y - (s.y + sz.h / 2 + 5)) / 24; const m = Math.hypot(jx, jy); if (m > 1) { jx /= m; jy /= m; } cur.jx = Math.round(jx * 100) / 100; cur.jy = Math.round(jy * 100) / 100; }
+    const t = Date.now();
+    byId.set(s.id, cur); redraw();
+    if (t - d.sent > 66) { d.sent = t; commit([cur], [], false); }
   }
   /** A flow control whose knob is under the pointer. */
   function knobAt(p) {
@@ -2355,6 +2468,10 @@
       if (g) { selection = new Set([g.id]); syncSelBar(); openSettings(g); redraw(); return; }
     }
     if (tool === 'select' && !readOnly && !e.shiftKey) {
+      const ctl = ctlAt(p);
+      if (ctl) { drag = { kind: 'ctl', s: ctl, orig: clone(ctl), sent: 0 }; ctlDrag(drag, p); return; }
+    }
+    if (tool === 'select' && !readOnly && !e.shiftKey) {
       const kn = knobAt(p);
       if (kn) { const r = knobRange(kn); drag = { kind: 'knob', s: kn, orig: clone(kn), v: r.value, lastY: p.y, preview: [kn], sent: 0, sentValue: kn.value }; knobDrag(drag, p); cv.style.cursor = 'grabbing'; return; }
     }
@@ -2454,18 +2571,19 @@
         break;
       }
       case 'resize': {
-        p = local(drag.s, p);
+        const q = local(drag.s, p); // the pointer in the shape's own (unrotated) frame
         const b0 = drag.b0, o = drag.h;
         const fx = o.ox === 'x1' ? b0.x1 : b0.x2, fy = o.oy === 'y1' ? b0.y1 : b0.y2;
         // Keep the offset between the handle and the shape's corner (no jump when grabbing).
         const cx = o.ox === 'x1' ? b0.x2 : b0.x1, cy = o.oy === 'y1' ? b0.y2 : b0.y1;
-        let x = snapV(p.x - (o.x - cx)), y = snapV(p.y - (o.y - cy));
+        let x = snapV(q.x - (o.x - cx)), y = snapV(q.y - (o.y - cy));
         if (e.shiftKey) { const r = Math.max(Math.abs(x - fx) / Math.max(1, b0.x2 - b0.x1), Math.abs(y - fy) / Math.max(1, b0.y2 - b0.y1)); x = fx + Math.sign(x - fx || 1) * r * (b0.x2 - b0.x1); y = fy + Math.sign(y - fy || 1) * r * (b0.y2 - b0.y1); }
         const b1 = { x1: Math.min(fx, x), y1: Math.min(fy, y), x2: Math.max(fx, x), y2: Math.max(fy, y) };
         drag.preview = [scaled(drag.s, b0, b1)];
         break;
       }
       case 'erase': eraseAt(p); break;
+      case 'ctl': ctlDrag(drag, p); break;
       case 'knob': {
         const v = knobDrag(drag, p);
         drag.preview = [{ ...clone(drag.s), value: v }];
@@ -2528,7 +2646,10 @@
       }
       case 'move':
         if (d.moved && d.preview && d.preview.length) commit(d.preview);
-        else if (!d.moved && d.clickOn && d.clickOn.type === 'node' && (d.clickOn.kind === 'SWITCH' || d.clickOn.kind === 'LEVER') && !readOnly) {
+        else if (!d.moved && d.clickOn && d.clickOn.type === 'node' && d.clickOn.kind === 'SELECTOR' && !readOnly) {
+          commit([{ ...clone(byId.get(d.clickOn.id) || d.clickOn), value: ((Math.round(Number(d.clickOn.value)) || 0) + 1) % 3 }]);
+        }
+        else if (!d.moved && d.clickOn && d.clickOn.type === 'node' && (d.clickOn.kind === 'SWITCH' || d.clickOn.kind === 'LEVER' || d.clickOn.kind === 'ESTOP') && !readOnly) {
           commit([{ ...clone(byId.get(d.clickOn.id) || d.clickOn), value: !d.clickOn.value }]); // click a switch/lever to flip it
         }
         break;
@@ -2541,6 +2662,7 @@
       }
       case 'erase': break;
       case 'knob': if (d.preview && d.preview[0].value !== d.orig.value) commit(d.preview, [], true, [d.orig]); break;
+      case 'ctl': { const cur = clone(byId.get(d.s.id) || d.s); if (cur.kind === 'JOYSTICK') { cur.jx = 0; cur.jy = 0; } commit([cur], [], true, [d.orig]); break; }
       case 'draw': {
         const s = d.shape;
         const b = bbox(s);
@@ -2734,6 +2856,8 @@
     else if (m.type === 'pointer') { pointers.set(m.id, { ...m, at: Date.now() }); redraw(); }
     else if (m.type === 'sim' && m.sim) {
       sim = { v: new Map(Object.entries(m.sim.v || {})), i: new Map(Object.entries(m.sim.i || {})), s: new Map(Object.entries(m.sim.s || {})) };
+      posePrev = poseCur; poseCur = new Map(Object.entries(m.sim.p || {})); poseT = performance.now();
+      springEnds = new Map(Object.entries(m.sim.sp || {}));
       updateSound();
       redraw();
     }
@@ -2744,7 +2868,7 @@
   });
 
   // Test page only (test/board-harness.html): expose internals for debugging.
-  if (window.__store) window.__wb = { contentBox, bbox, worldBox, shapes: () => shapes, view: () => view, draw };
+  if (window.__store) window.__wb = { contentBox, bbox, worldBox, shapes: () => shapes, view: () => view, draw, handleAt, selection: () => selection, resizable };
   syncBar();
   syncSound();
   resize();

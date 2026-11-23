@@ -9,6 +9,10 @@
   'use strict';
 
   const TICK_MS = 50;
+  /** Extensions (physics, extra parts) plug into the simulator here. */
+  const hooks = [];
+  /** Where a moving part is right now (physics): { x, y, a } of its center, or null. */
+  let poseProvider = null;
   const truthy = (v) => !!v && v !== 0;
   const num = (v) => (typeof v === 'boolean' ? (v ? 1 : 0) : Number.isFinite(v) ? v : 0);
   const rising = (cur, prev) => truthy(cur) && !truthy(prev);
@@ -172,7 +176,6 @@
           else if (double ? F < -load : F < 0) { st.x = Math.max(0, st.x - (double ? speed(-F - load) : 0.04) * tRet); throttle = tRet; }
           st.throttle = throttle;
           st.f = F;
-          if (sim) pushByRod(node, st, sim);
         },
         out: (st) => [st.x >= 0.999, Math.round(st.x * 100), st.x <= 0.001, Math.round(st.f * 10) / 10],
         show: (st) => ({ x: st.x, f: st.f, throttle: st.throttle ?? 1 }),
@@ -184,8 +187,8 @@
   const rot2 = (p, c, a) => { const cos = Math.cos(a), sin = Math.sin(a); return { x: c.x + (p.x - c.x) * cos - (p.y - c.y) * sin, y: c.y + (p.x - c.x) * sin + (p.y - c.y) * cos }; };
   /** Size of a module that can be resized (blocks), else its catalog size. */
   function sizeOf(n) {
-    const k = KINDS[n.kind] || {};
-    return { w: Math.max(10, Number(n.bw) || k.w || 60), h: Math.max(10, Number(n.bh) || k.h || 40) };
+    const d = def(n.kind) || { w: 60, h: 40 }; // def() also works out heights that depend on the number of pins
+    return { w: Math.max(10, Number(n.bw) || d.w || 60), h: Math.max(10, Number(n.bh) || d.h || 40) };
   }
   /** Rotation point of a steel block in its own coordinates, or null (it slides). */
   function pivotOf(n, w, h) {
@@ -351,14 +354,7 @@
 
   function limitHit(node, sim) {
     const zone = limitZone(node);
-    for (const [id, n] of sim.nodes) {
-      if (n.kind !== 'STEEL' && n.kind !== 'BEDROCK') continue;
-      const g = blockGeom(n, sim.state.get(id));
-      for (let i = 0; i < 4; i++) {
-        const a = g.pts[i], b = g.pts[(i + 1) % 4], len = Math.hypot(b.x - a.x, b.y - a.y);
-        for (let t = 0; t <= len; t += 3) if (zone.inside({ x: a.x + ((b.x - a.x) * t) / len, y: a.y + ((b.y - a.y) * t) / len })) return true;
-      }
-    }
+    for (const h of hooks) if (h.zoneHit && h.zoneHit(zone, sim, node)) return true;
     for (const [id, n] of sim.nodes) {
       if (n.kind !== 'CYLINDER' && n.kind !== 'CYL_DA') continue;
       const st = sim.state.get(id);
@@ -632,30 +628,36 @@
   function pinPos(n, side, i, raw) {
     const d = def(n.kind);
     if (!d) return { x: n.x, y: n.y, dx: 1, dy: 0 };
+    const sz = sizeOf(n); // resized parts keep their pins on their edges
     let p;
     // Modules with a title bar keep their side pins below it (gates and fluid symbols have none).
     const top = d.cat === 'gate' || d.bare ? 0 : 24;
-    const spread = (j, count) => top + ((d.h - top) * (j + 1)) / (count + 1);
+    const spread = (j, count) => top + ((sz.h - top) * (j + 1)) / (count + 1);
     const list = side === 'out' ? d.outs : d.ins;
     const pin = list[i] || {};
     const at = sideOf(pin, side);
     if (at === 'top' || at === 'bottom') {
       let x;
-      if (pin.f !== undefined) x = d.w * pin.f;
+      if (pin.f !== undefined) x = sz.w * pin.f;
       else {
         const same = [...d.ins.filter((q) => q.at === at), ...d.outs.filter((q) => q.at === at)];
-        x = (d.w * (same.indexOf(pin) + 1)) / (same.length + 1);
+        x = (sz.w * (same.indexOf(pin) + 1)) / (same.length + 1);
       }
-      p = { x: n.x + x, y: at === 'top' ? n.y : n.y + d.h, dx: 0, dy: at === 'top' ? -1 : 1 };
+      p = { x: n.x + x, y: at === 'top' ? n.y : n.y + sz.h, dx: 0, dy: at === 'top' ? -1 : 1 };
     } else {
       const same = list.filter((q) => sideOf(q, side) === at);
       const j = same.indexOf(pin);
       const rowsLayout = (d.cat === 'func' || d.cat === 'mem') && at === (side === 'out' ? 'right' : 'left');
       const y = rowsLayout ? 30 + j * 22 + 11 : spread(j, same.length);
-      p = at === 'left' ? { x: n.x, y: n.y + y, dx: -1, dy: 0 } : { x: n.x + d.w, y: n.y + y, dx: 1, dy: 0 };
+      p = at === 'left' ? { x: n.x, y: n.y + y, dx: -1, dy: 0 } : { x: n.x + sz.w, y: n.y + y, dx: 1, dy: 0 };
+    }
+    const P = !raw && poseProvider ? poseProvider(n) : null;
+    if (P) { // part moved by physics: rotate around its center to where it is now
+      const sz = sizeOf(n), cx0 = n.x + sz.w / 2, cy0 = n.y + sz.h / 2, ca = Math.cos(P.a), sa = Math.sin(P.a);
+      return { x: P.x + (p.x - cx0) * ca - (p.y - cy0) * sa, y: P.y + (p.x - cx0) * sa + (p.y - cy0) * ca, dx: p.dx * ca - p.dy * sa, dy: p.dx * sa + p.dy * ca };
     }
     if (raw || !n.rot) return p;
-    const cx = n.x + d.w / 2, cy = n.y + d.h / 2, a = (n.rot * Math.PI) / 180, cos = Math.cos(a), sin = Math.sin(a);
+    const cx = n.x + sz.w / 2, cy = n.y + sz.h / 2, a = (n.rot * Math.PI) / 180, cos = Math.cos(a), sin = Math.sin(a);
     return {
       x: cx + (p.x - cx) * cos - (p.y - cy) * sin, y: cy + (p.x - cx) * sin + (p.y - cy) * cos,
       dx: p.dx * cos - p.dy * sin, dy: p.dx * sin + p.dy * cos,
@@ -681,6 +683,7 @@
 
     /** (Re)loads the board: nodes, wires, values. Keeps memory of nodes that still exist. */
     load(shapes) {
+      this.meta = shapes.find((s) => s && s.type === 'meta') || null; // board settings (host only)
       this.nodes = new Map();
       for (const s of shapes) if (s && s.type === 'node' && KINDS[s.kind]) this.nodes.set(s.id, s);
       this.feeds = new Map();
@@ -692,8 +695,10 @@
       for (const [id, n] of this.nodes) {
         const k = KINDS[n.kind];
         if (k.seq && (!this.state.has(id) || this.state.get(id).__kind !== n.kind)) this.state.set(id, { ...k.seq.init(n), __kind: n.kind });
+        if (k.seq && n.resetAt && this.state.get(id).__reset !== n.resetAt) Object.assign(this.state.get(id), k.seq.init(n), { __reset: n.resetAt, __kind: n.kind }); // Reset button
         if (k.seq && k.seq.sig) { const st = this.state.get(id), sig = k.seq.sig(n); if (st.__sig !== sig) Object.assign(st, k.seq.init(n), { __sig: sig, __kind: n.kind }); }
       }
+      for (const h of hooks) if (h.load) h.load(this);
       this.settle();
       // Connecting or removing a wire is not a signal edge.
       for (const [id, n] of this.nodes) {
@@ -719,6 +724,7 @@
         k.seq.update(this.state.get(id), ins, prev, n, this, k.k);
         this.prev.set(id, ins.slice());
       }
+      for (const h of hooks) if (h.step) h.step(this);
       this.settle();
     }
 
@@ -746,7 +752,7 @@
     }
 
     /** Pushed blocks that came to rest (the host writes their new place into the board). */
-    settledBlocks() { return settledBlocks(this); }
+    settledBlocks() { const out = []; for (const h of hooks) if (h.settled) out.push(...h.settled(this)); return out; }
 
     /** What the whiteboards need to draw: outputs, inputs and visible memory, per node. */
     snapshot() {
@@ -757,7 +763,9 @@
         const k = KINDS[n.kind];
         if (k.seq && k.seq.show) s[id] = k.seq.show(this.state.get(id));
       }
-      return { tick: this.tick, v, i, s };
+      const snap = { tick: this.tick, v, i, s };
+      for (const h of hooks) if (h.snapshot) h.snapshot(this, snap);
+      return snap;
     }
   }
 
@@ -775,7 +783,8 @@
     return i + 12 * ((m[3] !== undefined ? Number(m[3]) : 4) - 4);
   }
 
-  const api = { KINDS, TICK_MS, def, pinPos, Sim, truthy, num, ticksOf, noteName, noteHz, parseNote, VLAYOUT, VALVE_H, BOX_Y1, BOX_Y2, valveBoxes, CYL, rodSegment, limitZone, flowOpening, potRange, potValue, sizeOf, blockGeom, settledBlocks };
+  const api = { KINDS, TICK_MS, def, pinPos, Sim, truthy, num, ticksOf, noteName, noteHz, parseNote, VLAYOUT, VALVE_H, BOX_Y1, BOX_Y2, valveBoxes, CYL, rodSegment, limitZone, flowOpening, potRange, potValue, sizeOf, blockGeom, settledBlocks,
+    hooks, addHook: (h) => hooks.push(h), setPoseProvider: (f) => { poseProvider = f; }, getPoseProvider: () => poseProvider, B, HYD, HYD_IN, PILOT, rising };
   if (typeof module === 'object' && module.exports) module.exports = api;
   else root.CollabCircuit = api;
 })(typeof globalThis !== 'undefined' ? globalThis : this);

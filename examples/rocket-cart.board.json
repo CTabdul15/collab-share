@@ -1,0 +1,167 @@
+{
+ "format": "collab-share-whiteboard",
+ "version": 1,
+ "saved": "2026-11-21T12:00:00.000Z",
+ "shapes": [
+  {
+   "id": "readme",
+   "type": "note",
+   "x": -520,
+   "y": -290,
+   "w": 320,
+   "h": 200,
+   "text": "Rocket cart: hit FIRE (it latches). The thruster mounted on the cart pushes it along the track; the speed sensor on the cart shows its speed. Hit FIRE again to cut the thrust. Aim the thruster by rotating it.",
+   "color": "#ffd166",
+   "by": "Collab Share example",
+   "t": 1,
+   "z": 2
+  },
+  {
+   "id": "track",
+   "type": "node",
+   "kind": "BEDROCK",
+   "x": -540,
+   "y": 400,
+   "by": "Collab Share example",
+   "t": 2,
+   "z": 3,
+   "bw": 2600,
+   "bh": 40
+  },
+  {
+   "id": "endStop",
+   "type": "node",
+   "kind": "BEDROCK",
+   "x": 2020,
+   "y": 240,
+   "by": "Collab Share example",
+   "t": 3,
+   "z": 4,
+   "bw": 40,
+   "bh": 160
+  },
+  {
+   "id": "buffer",
+   "type": "node",
+   "kind": "BUMPER",
+   "x": 1980,
+   "y": 340,
+   "by": "Collab Share example",
+   "t": 4,
+   "z": 5,
+   "bw": 50,
+   "bh": 50
+  },
+  {
+   "id": "fire",
+   "type": "node",
+   "kind": "BUTTON",
+   "x": -520,
+   "y": 100,
+   "by": "Collab Share example",
+   "t": 5,
+   "z": 6,
+   "latch": true,
+   "value": false,
+   "color": "#ef4444"
+  },
+  {
+   "id": "cart",
+   "type": "node",
+   "kind": "BEAM",
+   "x": -300,
+   "y": 318,
+   "by": "Collab Share example",
+   "t": 6,
+   "z": 7,
+   "bw": 200,
+   "bh": 20,
+   "color": "#3b82f6"
+  },
+  {
+   "id": "w1",
+   "type": "node",
+   "kind": "WHEEL",
+   "x": -320,
+   "y": 308,
+   "by": "Collab Share example",
+   "t": 7,
+   "z": 8,
+   "bw": 50,
+   "bh": 50
+  },
+  {
+   "id": "w2",
+   "type": "node",
+   "kind": "WHEEL",
+   "x": -150,
+   "y": 308,
+   "by": "Collab Share example",
+   "t": 8,
+   "z": 9,
+   "bw": 50,
+   "bh": 50
+  },
+  {
+   "id": "jet",
+   "type": "node",
+   "kind": "THRUSTER",
+   "x": -290,
+   "y": 315,
+   "by": "Collab Share example",
+   "t": 9,
+   "z": 10,
+   "value": 80
+  },
+  {
+   "id": "speed",
+   "type": "node",
+   "kind": "SPEEDO",
+   "x": -180,
+   "y": 314,
+   "by": "Collab Share example",
+   "t": 10,
+   "z": 11
+  },
+  {
+   "id": "show",
+   "type": "node",
+   "kind": "DISPLAY",
+   "x": -300,
+   "y": 120,
+   "by": "Collab Share example",
+   "t": 11,
+   "z": 12
+  },
+  {
+   "id": "w-speed.0-show.0",
+   "type": "wire",
+   "a": {
+    "n": "speed",
+    "p": 0
+   },
+   "b": {
+    "n": "show",
+    "p": 0
+   },
+   "by": "Collab Share example",
+   "t": 12,
+   "z": 0
+  },
+  {
+   "id": "w-fire.0-jet.0",
+   "type": "wire",
+   "a": {
+    "n": "fire",
+    "p": 0
+   },
+   "b": {
+    "n": "jet",
+    "p": 0
+   },
+   "by": "Collab Share example",
+   "t": 13,
+   "z": 0
+  }
+ ]
+}
